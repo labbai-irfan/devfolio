@@ -12,7 +12,7 @@ src/commands/       one file per menu section: what to show and which actions ex
 src/ui/             drawing: card, layout, menus
 src/services/       the outside world: browser, clipboard, download, GitHub
 src/lib/            generic helpers: colors, logging, terminal, validation
-src/data/           personal information (JSON) and generated/ build output
+src/data/           personal information (JSON) and the build output (profile.sh, github.sh, qr.txt)
 ```
 
 **Dependency rule:** `core → commands → ui/services → lib`. Lower layers never call upper layers. `lib/` has no knowledge of this profile, so it could be reused elsewhere.
@@ -24,9 +24,8 @@ Services return status codes and never call `exit`. Commands turn those codes in
 1. `npx labbai-irfan` runs `bin/labbai-irfan.js`. It finds Bash (on Windows, Git Bash, skipping WSL's `System32\bash.exe`) and starts `bin/labbai-irfan` with your arguments.
 2. `bin/labbai-irfan` follows symlinks to find the install directory, checks the Bash version, and sources `src/main.sh`.
 3. `src/main.sh` sources all modules, then calls `app_run`.
-4. `app_run` reads flags, detects the platform, sets up colors and layout, and loads `src/data/generated/profile.sh`. If that file is missing, it exits with code 3 and says to run the build.
+4. `app_run` reads flags, detects the platform, sets up colors and layout, and loads `src/data/profile.sh`. If that file is missing, it exits with code 3 and says to run the build.
 5. It picks a mode:
-   - `--json`: print `generated/profile.json` and exit.
    - `--card`, or output is not a terminal: print the static card and exit.
    - Otherwise: start the interactive menu.
 
@@ -41,10 +40,9 @@ A handler sets `MENU_DONE` when it wants to leave its screen. Only the project t
 ```
 src/data/*.json ──validate-data.sh──► checks
         │
-        └──build.sh──► generated/profile.sh     (Bash variables, values escaped with @sh)
-                   ├─► generated/profile.json   (used by --json)
-                   ├─► generated/github.sh      (GitHub snapshot, best effort)
-                   └─► generated/qr.txt         (only if qrencode is installed)
+        └──build.sh──► profile.sh     (Bash variables, values escaped with @sh)
+                   ├─► github.sh      (GitHub snapshot, best effort)
+                   └─► qr.txt         (only if qrencode is installed)
 ```
 
 Lists are stored as parallel indexed arrays, such as `PROJECT_NAME[i]`. Fields with several values (tags, highlights) are joined with `|` and split when drawn. Bash 3.2 has no associative arrays, so none are used.

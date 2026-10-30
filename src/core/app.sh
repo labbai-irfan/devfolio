@@ -14,7 +14,6 @@ app_run() {
   case "$CFG_ACTION" in
     help)    args_usage; exit "$EXIT_OK" ;;
     version) printf '%s %s\n' "$APP_NAME" "$APP_VERSION"; exit "$EXIT_OK" ;;
-    json)    cmd_export; exit "$EXIT_OK" ;;
   esac
 
   platform_detect
@@ -45,7 +44,7 @@ app_run() {
 
 # Sources the compiled profile (built from src/data/*.json by scripts/build.sh).
 app_load_data() {
-  local data="$APP_ROOT/src/data/generated/profile.sh"
+  local data="$APP_ROOT/src/data/profile.sh"
   if [[ ! -f "$data" ]]; then
     log_error "profile data is not built yet. Run: npm run build"
     exit "$EXIT_DEPENDENCY"

@@ -1,8 +1,20 @@
 [
   {
-    "name": "<Certification>",
-    "issuer": "<Issuer>",
-    "date": "<YYYY-MM>",
-    "url": "<Optional https://verify-url>"
+    "name": "Sparkathon Winner",
+    "issuer": "Father Agnel College, Vashi",
+    "date": "",
+    "url": ""
+  },
+  {
+    "name": "Mumbai Hacks 2025 – Selected Participant",
+    "issuer": "Mumbai Hacks",
+    "date": "2025",
+    "url": ""
+  },
+  {
+    "name": "Research Paper Competition Winner",
+    "issuer": "Pillai HOC College",
+    "date": "",
+    "url": ""
   }
 ]

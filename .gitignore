@@ -1,3 +1,5 @@
 node_modules/
-src/data/generated/
+src/data/profile.sh
+src/data/github.sh
+src/data/qr.txt
 *.tgz

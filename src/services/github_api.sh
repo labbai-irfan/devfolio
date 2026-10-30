@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # GitHub public stats (no token needed). Fetches the profile and repos, turns them into GH_* variables,
-# and loads them live at runtime or from the build snapshot (src/data/generated/github.sh).
+# and loads them live at runtime or from the build snapshot (src/data/github.sh).
 # The generated code is shell assignments built with jq's @sh, so sourcing it is safe.
 
 [[ -n "${_GITHUB_API_SH:-}" ]] && return 0
@@ -100,7 +100,7 @@ github_load() {
 }
 
 github_load_snapshot() {
-  local snap="$APP_ROOT/src/data/generated/github.sh" reason="$GH_ERROR"
+  local snap="$APP_ROOT/src/data/github.sh" reason="$GH_ERROR"
   [[ -f "$snap" ]] || return 0
   # shellcheck source=/dev/null
   source "$snap"

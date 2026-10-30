@@ -1,4 +1,102 @@
 [
-  { "category": "<Category, e.g. Languages>", "items": ["<Skill>", "<Skill>", "<Skill>"] },
-  { "category": "<Category, e.g. Tools>", "items": ["<Skill>", "<Skill>"] }
+  {
+    "category": "DevOps & CI/CD",
+    "items": [
+      "Git",
+      "GitHub",
+      "GitHub Actions",
+      "CI/CD Pipelines",
+      "Shell Scripting",
+      "Bash",
+      "Git Automation",
+      "Deployment Automation"
+    ]
+  },
+  {
+    "category": "Cloud & Infrastructure",
+    "items": [
+      "AWS",
+      "AWS EC2",
+      "AWS S3",
+      "AWS Amplify",
+      "Vercel",
+      "Railway",
+      "Cloud Infrastructure",
+      "Cloud Deployment"
+    ]
+  },
+  {
+    "category": "Containers & Virtualization",
+    "items": [
+      "Docker",
+      "Docker Compose",
+      "Containerization",
+      "Docker Networking",
+      "Redis"
+    ]
+  },
+  {
+    "category": "Operating Systems",
+    "items": [
+      "Linux",
+      "Ubuntu",
+      "Windows",
+      "Linux Command Line",
+      "Process Management",
+      "File Permissions"
+    ]
+  },
+  {
+    "category": "Programming & Scripting",
+    "items": [
+      "JavaScript",
+      "TypeScript",
+      "Python",
+      "Bash",
+      "SQL"
+    ]
+  },
+  {
+    "category": "Frontend Development",
+    "items": [
+      "React.js",
+      "HTML5",
+      "CSS3",
+      "Tailwind CSS",
+      "Bootstrap",
+      "Vite",
+      "Material UI"
+    ]
+  },
+  {
+    "category": "Backend Development",
+    "items": [
+      "Node.js",
+      "Express.js",
+      "FastAPI",
+      "REST APIs",
+      "Prisma ORM"
+    ]
+  },
+  {
+    "category": "Databases & Storage",
+    "items": [
+      "MySQL",
+      "MongoDB",
+      "Firebase Firestore",
+      "Supabase",
+      "Redis"
+    ]
+  },
+  {
+    "category": "Development Tools",
+    "items": [
+      "VS Code",
+      "Postman",
+      "GitHub",
+      "npm",
+      "PM2",
+      "MySQL Workbench"
+    ]
+  }
 ]

@@ -13,7 +13,6 @@ Runs interactively in a terminal; prints a static card when piped.
 
 Options:
       --card           Print the static card and exit.
-      --json           Print the profile as JSON and exit.
       --theme <name>   Color theme: default or mono (also LABBAI_THEME).
       --plain          No colors, no box drawing, ASCII only.
       --no-color       Disable colors (same as NO_COLOR=1).
@@ -30,7 +29,6 @@ args_parse() {
       -h|--help)     CFG_ACTION="help" ;;
       -v|--version)  CFG_ACTION="version" ;;
       --card)        CFG_ACTION="card" ;;
-      --json)        CFG_ACTION="json" ;;
       --theme)
         if (( $# < 2 )); then
           log_error "--theme needs a value: default or mono"

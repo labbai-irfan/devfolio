@@ -53,8 +53,6 @@ source "$APP_ROOT/src/commands/resume.sh"
 source "$APP_ROOT/src/commands/github.sh"
 # shellcheck source=commands/portfolio.sh
 source "$APP_ROOT/src/commands/portfolio.sh"
-# shellcheck source=commands/export.sh
-source "$APP_ROOT/src/commands/export.sh"
 
 # shellcheck source=core/app.sh
 source "$APP_ROOT/src/core/app.sh"

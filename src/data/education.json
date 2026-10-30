@@ -1,9 +1,16 @@
 [
   {
-    "degree": "<Degree>",
-    "institution": "<Institution>",
-    "start": "<YYYY>",
-    "end": "<YYYY>",
-    "notes": "<Optional notes>"
+    "degree": "Bachelor of Science in Information Technology",
+    "institution": "Kalsekar Technical Campus (AIKTC), University of Mumbai",
+    "start": "2023",
+    "end": "2026",
+    "notes": "Undergraduate degree in Information Technology."
+  },
+  {
+    "degree": "Master of Science in Information Technology",
+    "institution": "Pillai College, University of Mumbai",
+    "start": "2026",
+    "end": "present",
+    "notes": "Currently pursuing postgraduate studies in Information Technology."
   }
 ]

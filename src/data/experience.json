@@ -1,10 +1,28 @@
 [
   {
-    "role": "<Role>",
-    "company": "<Company>",
-    "location": "<City / Remote>",
-    "start": "<YYYY-MM>",
-    "end": "<YYYY-MM or present>",
-    "highlights": ["<Achievement 1>", "<Achievement 2>"]
+    "role": "Junior Software Engineer",
+    "company": "Wisetech MEP Consultants Pvt. Ltd.",
+    "location": "Mumbai, India",
+    "start": "2026-04",
+    "end": "present",
+    "highlights": [
+      "Developing and maintaining production-grade HRMS and CRM platforms using React.js, TypeScript, Node.js, Express.js, Prisma ORM, and MySQL.",
+      "Building reusable frontend components and REST APIs to improve application scalability and maintainability.",
+      "Working on enterprise modules including payroll, attendance, employee management, CRM, and billing workflows.",
+      "Exploring DevOps practices, CI/CD pipelines, Docker, Git automation, and AWS deployment to improve software delivery and infrastructure workflows."
+    ]
+  },
+  {
+    "role": "Full Stack Developer Intern",
+    "company": "Arba Accelerator Company",
+    "location": "India",
+    "start": "2025-07",
+    "end": "2026-01",
+    "highlights": [
+      "Developed full-stack web application features using React.js, TypeScript, Node.js, Express.js, and MySQL.",
+      "Worked on frontend development, backend API integration, database operations, and application functionality.",
+      "Collaborated on real-world development tasks and gained practical experience in software engineering workflows.",
+      "Improved problem-solving, debugging, and application development skills through hands-on project experience."
+    ]
   }
 ]

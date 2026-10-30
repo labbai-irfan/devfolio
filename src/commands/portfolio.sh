@@ -7,7 +7,7 @@ _CMD_PORTFOLIO_SH=1
 cmd_portfolio() { menu_loop portfolio_render portfolio_handle; }
 
 portfolio_render() {
-  local qr="$APP_ROOT/src/data/generated/qr.txt" line
+  local qr="$APP_ROOT/src/data/qr.txt" line
   layout_header "Portfolio"
   printf '\n'
   if [[ -f "$qr" && "$PLATFORM_UTF8" == 1 ]] && (( PLATFORM_WIDTH >= 40 )); then

@@ -23,7 +23,7 @@ npm run release:check  # pre-release gate (see Releasing)
 shellcheck bin/labbai-irfan && find scripts src -name '*.sh' -exec shellcheck {} +
 ```
 
-`npm run build` must run after any change to `src/data/*.json`. The app reads the generated files, not the JSON.
+`npm run build` must run after any change to `src/data/*.json`. The app reads the generated files (profile.sh, github.sh, qr.txt), not the JSON.
 
 ## Updating the profile
 
