@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck and jq
+        run: sudo apt-get update && sudo apt-get install -y shellcheck jq
+
+      - name: Syntax check
+        run: |
+          bash -n bin/labbai-irfan
+          find scripts src -name '*.sh' -exec bash -n {} +
+
+      - name: ShellCheck
+        run: |
+          shellcheck bin/labbai-irfan
+          find scripts src -name '*.sh' -exec shellcheck {} +
+
+      - name: Validate profile data
+        run: bash scripts/validate-data.sh
+
+  package:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install jq (macOS and Windows)
+        if: runner.os != 'Linux'
+        run: brew install jq || choco install jq -y --no-progress
+
+      - name: Build profile data
+        run: npm run build
+
+      - name: Pack and check size
+        shell: bash
+        run: |
+          npm pack --json --ignore-scripts > pack.json
+          node -e "const [p] = require('./pack.json'); console.log(p.filename, p.unpackedSize, 'bytes unpacked'); if (p.unpackedSize > 60 * 1024) { console.error('Package is larger than 60 KB'); process.exit(1); }"
+
+      - name: Smoke test the packed tarball
+        shell: bash
+        run: |
+          tgz="$(node -p "require('./pack.json')[0].filename")"
+          npx --yes "./$tgz" --card

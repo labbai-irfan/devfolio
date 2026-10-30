@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Release checks
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: bash scripts/release-check.sh
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          # Pre-release versions such as 0.9.0-rc.1 go to the "next" tag, so "npx labbai-irfan" keeps the stable release.
+          tag=latest
+          if [[ "$version" == *-* ]]; then tag=next; fi
+          # prepack runs scripts/build.sh, so the profile data is compiled into the package.
+          npm publish --provenance --access public --tag "$tag"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="${RELEASE_TAG#v}"
+          # Release notes are the CHANGELOG section for this version.
+          awk -v heading="## [$version]" 'index($0, heading) == 1 { on = 1; next } /^## \[/ { on = 0 } on' CHANGELOG.md > notes.md
+          prerelease=""
+          if [[ "$version" == *-* ]]; then prerelease="--prerelease"; fi
+          gh release create "$RELEASE_TAG" --title "$RELEASE_TAG" --notes-file notes.md $prerelease

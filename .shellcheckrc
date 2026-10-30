@@ -1,0 +1,5 @@
+external-sources=true
+source-path=SCRIPTDIR
+# SC2034 (unused variable) is off: config, color and profile variables are set in one module and
+# read in others. ShellCheck checks one file at a time, so it can't see those uses.
+disable=SC2034

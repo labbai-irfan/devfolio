@@ -1,0 +1,8 @@
+[
+  {
+    "name": "<Certification>",
+    "issuer": "<Issuer>",
+    "date": "<YYYY-MM>",
+    "url": "<Optional https://verify-url>"
+  }
+]

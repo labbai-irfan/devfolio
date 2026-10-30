@@ -1,0 +1,10 @@
+[
+  {
+    "role": "<Role>",
+    "company": "<Company>",
+    "location": "<City / Remote>",
+    "start": "<YYYY-MM>",
+    "end": "<YYYY-MM or present>",
+    "highlights": ["<Achievement 1>", "<Achievement 2>"]
+  }
+]

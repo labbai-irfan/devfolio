@@ -1,0 +1,31 @@
+{
+  "name": "labbai-irfan",
+  "version": "0.0.1",
+  "description": "Interactive developer card for Labbai Irfan, right in your terminal.",
+  "author": "Labbai Irfan",
+  "license": "MIT",
+  "keywords": [
+    "cli",
+    "bash",
+    "developer-card",
+    "business-card",
+    "npx"
+  ],
+  "bin": {
+    "labbai-irfan": "bin/labbai-irfan.js"
+  },
+  "files": [
+    "bin/",
+    "src/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "bash bin/labbai-irfan",
+    "build": "bash scripts/build.sh",
+    "validate": "bash scripts/validate-data.sh",
+    "release:check": "bash scripts/release-check.sh",
+    "prepack": "bash scripts/build.sh"
+  }
+}

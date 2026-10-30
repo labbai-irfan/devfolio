@@ -1,0 +1,14 @@
+[
+  {
+    "name": "<Project Name>",
+    "description": "<One or two lines about the project>",
+    "tags": ["<tag>", "<tag>"],
+    "url": "<https://project-url>"
+  },
+  {
+    "name": "<Project Name>",
+    "description": "<One or two lines about the project>",
+    "tags": ["<tag>"],
+    "url": "<https://project-url>"
+  }
+]

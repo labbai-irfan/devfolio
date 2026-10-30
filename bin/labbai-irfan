@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Bash entry point: resolve the real install dir (npm links bins via symlinks), check Bash, start the app.
+set -euo pipefail
+
+if (( BASH_VERSINFO[0] < 3 || (BASH_VERSINFO[0] == 3 && BASH_VERSINFO[1] < 2) )); then
+  printf 'labbai-irfan: Bash 3.2 or newer is required (found %s).\n' "$BASH_VERSION" >&2
+  exit 3
+fi
+
+# Portable symlink resolution (no `readlink -f`, missing on older macOS).
+src="${BASH_SOURCE[0]}"
+while [[ -L "$src" ]]; do
+  dir="$(cd -P "$(dirname "$src")" && pwd)"
+  src="$(readlink "$src")"
+  if [[ "$src" != /* ]]; then src="$dir/$src"; fi
+done
+APP_ROOT="$(cd -P "$(dirname "$src")/.." && pwd)"
+readonly APP_ROOT
+
+# shellcheck source=../src/main.sh
+source "$APP_ROOT/src/main.sh" "$@"

@@ -1,0 +1,25 @@
+{
+  "name": "Labbai Irfan",
+  "title": "<Professional Designation>",
+  "tagline": "<One-line introduction, max 60 chars>",
+  "about": [
+    "<Paragraph 1: who you are and what you do>",
+    "<Paragraph 2: what you are focused on right now>"
+  ],
+  "location": "<City, Country>",
+  "availability": "<e.g. Open to opportunities>",
+  "links": {
+    "portfolio": "<https://portfolio-url>",
+    "github": "<https://github.com/username>",
+    "linkedin": "<https://www.linkedin.com/in/username>"
+  },
+  "contact": {
+    "email": "<email@example.com>",
+    "whatsapp": "<country code + number, digits only>"
+  },
+  "resume": {
+    "pdf_url": "<https://direct-link-to/resume.pdf>",
+    "view_url": "<https://link-to-view-resume-online>"
+  },
+  "github_username": "<username>"
+}

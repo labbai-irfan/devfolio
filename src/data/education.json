@@ -1,0 +1,9 @@
+[
+  {
+    "degree": "<Degree>",
+    "institution": "<Institution>",
+    "start": "<YYYY>",
+    "end": "<YYYY>",
+    "notes": "<Optional notes>"
+  }
+]

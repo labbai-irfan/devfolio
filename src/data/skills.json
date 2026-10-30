@@ -1,0 +1,4 @@
+[
+  { "category": "<Category, e.g. Languages>", "items": ["<Skill>", "<Skill>", "<Skill>"] },
+  { "category": "<Category, e.g. Tools>", "items": ["<Skill>", "<Skill>"] }
+]
