@@ -1,68 +1,78 @@
 [
-{
-"name": "Wisetech HRMS & CRM",
-"description": "Enterprise platforms for HRMS, payroll, attendance, CRM, billing, and business operations using modern full-stack technologies.",
-"tags": [
-"Software Engineering",
-"React.js",
-"TypeScript",
-"Node.js",
-"Express.js",
-"Prisma",
-"MySQL",
-"AWS"
-],
-"url": ""
-},
-{
-"name": "PopularBookWorld",
-"description": "E-commerce platform for online book discovery, product browsing, shopping, and integrated Razorpay payments.",
-"tags": [
-"Full-Stack Development",
-"E-Commerce",
-"React.js",
-"Node.js",
-"MySQL",
-"Razorpay",
-"SEO"
-],
-"url": ""
-},
-{
-"name": "Alert360",
-"description": "AI-powered accident detection system using YOLOv8 and computer vision to identify road accidents.",
-"tags": [
-"Artificial Intelligence",
-"Machine Learning",
-"Python",
-"YOLOv8",
-"OpenCV",
-"Computer Vision"
-],
-"url": ""
-},
-{
-"name": "Dockerized Todo Application",
-"description": "Containerized Node.js and MySQL application exploring Docker images, networking, containers, and deployment.",
-"tags": [
-"DevOps",
-"Docker",
-"Docker Networking",
-"MySQL",
-"Node.js",
-"Containerization"
-],
-"url": "https://github.com/nknithi/todo-mysql"
-},
-{
-"name": "Recipit",
-"description": "Recipe discovery application for exploring recipes, managing meals, and discovering cooking inspiration.",
-"tags": [
-"Full-Stack Development",
-"React.js",
-"Node.js",
-"API Integration"
-],
-"url": ""
-}
+  {
+    "name": "Wisetech HRMS & CRM",
+    "category": "Enterprise Software & Cloud",
+    "description": "Production-grade HRMS, payroll, attendance, CRM, billing, and enterprise business operations platforms.",
+    "tags": [
+      "React.js",
+      "TypeScript",
+      "Node.js",
+      "Express.js",
+      "Prisma ORM",
+      "MySQL",
+      "AWS"
+    ],
+    "url": "",
+    "featured": true,
+    "status": "In Production"
+  },
+  {
+    "name": "Dockerized Todo Application",
+    "category": "DevOps & Containerization",
+    "description": "Containerized multi-tier Node.js and MySQL application exploring Docker images, networking, volumes, and deployment.",
+    "tags": [
+      "Docker",
+      "Docker Compose",
+      "Node.js",
+      "MySQL",
+      "Containerization"
+    ],
+    "url": "https://github.com/nknithi/todo-mysql",
+    "featured": true,
+    "status": "Completed"
+  },
+  {
+    "name": "Alert360",
+    "category": "AI & Computer Vision",
+    "description": "AI-powered real-time accident detection and surveillance system using YOLOv8 and computer vision.",
+    "tags": [
+      "Python",
+      "YOLOv8",
+      "OpenCV",
+      "Machine Learning",
+      "Computer Vision"
+    ],
+    "url": "",
+    "featured": false,
+    "status": "Completed"
+  },
+  {
+    "name": "PopularBookWorld",
+    "category": "Full-Stack & E-Commerce",
+    "description": "E-commerce platform for book discovery, shopping cart, customer checkout, and integrated Razorpay payments.",
+    "tags": [
+      "React.js",
+      "Node.js",
+      "MySQL",
+      "Razorpay",
+      "REST APIs"
+    ],
+    "url": "",
+    "featured": false,
+    "status": "Completed"
+  },
+  {
+    "name": "Recipit",
+    "category": "Full-Stack Development",
+    "description": "Interactive recipe discovery and meal management application for culinary inspiration and meal planning.",
+    "tags": [
+      "React.js",
+      "Node.js",
+      "API Integration",
+      "JavaScript"
+    ],
+    "url": "",
+    "featured": false,
+    "status": "Completed"
+  }
 ]

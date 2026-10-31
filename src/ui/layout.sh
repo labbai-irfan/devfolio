@@ -70,15 +70,16 @@ layout_repeat() {
 # --------------------------------------------------
 
 layout_separator() {
+  local c_border="${C_BORDER:-${C_DIM:-}}"
   printf '%s%s%s%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" \
+    "$c_border" \
     "$(layout_repeat "$BOX_H" "$LAYOUT_WIDTH")" \
     "${C_RESET:-}"
 }
 
 # --------------------------------------------------
-# Headers
+# Headers & Section Headings
 # --------------------------------------------------
 
 layout_header() {
@@ -98,24 +99,62 @@ layout_header() {
     "${C_RESET:-}" \
     "" \
     "$pad" '' \
-    "${C_DIM:-}" \
+    "${C_MUTED:-${C_DIM:-}}" \
     "$right" \
     "${C_RESET:-}"
 
   layout_separator
 }
 
+# Reusable section heading for interior screens (About, Career, Skills, etc.)
+layout_section_title() {
+  local title="$1"
+  local icon="${2:-◆}"
+  [[ "${PLATFORM_UTF8:-0}" != 1 ]] && icon=">"
+  printf '\n%s%s%s %s%s\n' \
+    "$LAYOUT_MARGIN" \
+    "${C_ACCENT:-}${C_BOLD:-}" \
+    "$icon" \
+    "$title" \
+    "${C_RESET:-}"
+}
+
+# Reusable technical badge tag list: layout_tag_pills "Git" "Docker" "AWS" ...
+layout_tag_pills() {
+  local -a tags=("$@")
+  local line="$LAYOUT_MARGIN  "
+  local t
+  local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
+  local c_dim="${C_DIM:-}"
+  local c_reset="${C_RESET:-}"
+
+  for t in "${tags[@]}"; do
+    [[ -z "$t" ]] && continue
+    line="${line}${c_cyan}[${c_reset}${t}${c_cyan}]${c_reset} "
+  done
+  printf '%s\n' "$line"
+}
+
 # --------------------------------------------------
 # Text wrapping
 # --------------------------------------------------
 
-# layout_wrap TEXT [INDENT] [COLOR]
+# layout_wrap TEXT [FIRST_INDENT] [REST_INDENT] [COLOR]
+# Backward compatible: If 3rd arg starts with ANSI escape or looks like color, treats as: text indent color
 layout_wrap() {
   local text="$1"
   local indent="${2:-}"
-  local color="${3:-}"
+  local rest_indent="${3:-$indent}"
+  local color="${4:-}"
   local line=""
   local word
+  local current_indent="$indent"
+
+  # Backward compatibility if only 3 arguments and arg 3 is color
+  if [[ $# -eq 3 && "$3" =~ ^(\x1b|\\033|$) ]]; then
+    color="$3"
+    rest_indent="$indent"
+  fi
 
   local width=$(( LAYOUT_WIDTH - ${#indent} ))
   local -a words=()
@@ -127,11 +166,13 @@ layout_wrap() {
     elif (( ${#line} + 1 + ${#word} > width )); then
       printf '%s%s%s%s%s\n' \
         "$LAYOUT_MARGIN" \
-        "$indent" \
+        "$current_indent" \
         "$color" \
         "$line" \
         "${C_RESET:-}"
 
+      current_indent="$rest_indent"
+      width=$(( LAYOUT_WIDTH - ${#rest_indent} ))
       line="$word"
     else
       line="$line $word"
@@ -141,7 +182,7 @@ layout_wrap() {
   if [[ -n "$line" ]]; then
     printf '%s%s%s%s%s\n' \
       "$LAYOUT_MARGIN" \
-      "$indent" \
+      "$current_indent" \
       "$color" \
       "$line" \
       "${C_RESET:-}"
@@ -154,25 +195,28 @@ layout_wrap() {
 # Key / value display
 # --------------------------------------------------
 
-# layout_kv LABEL VALUE [LABEL_WIDTH] — value is truncated with an ellipsis so the line never
-# overflows LAYOUT_WIDTH, since (unlike layout_wrap) it never breaks onto a second line.
+# layout_kv LABEL VALUE [LABEL_WIDTH] [LABEL_COLOR] [VAL_COLOR]
 layout_kv() {
   local label="$1"
   local value="$2"
-  local label_width="${3:-12}"
+  local label_width="${3:-14}"
+  local l_col="${4:-${C_CYAN:-${C_ACCENT:-}}}"
+  local v_col="${5:-${C_WHITE:-}}"
   local max=$(( LAYOUT_WIDTH - label_width ))
 
   if (( max > 1 )) && (( ${#value} > max )); then
     value="${value:0:$(( max - 1 ))}…"
   fi
 
-  printf '%s%s%-*s%s%s\n' \
+  printf '%s%s%-*s%s%s%s%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" \
+    "$l_col" \
     "$label_width" \
     "$label" \
     "${C_RESET:-}" \
-    "$value"
+    "$v_col" \
+    "$value" \
+    "${C_RESET:-}"
 }
 
 # --------------------------------------------------
@@ -180,9 +224,10 @@ layout_kv() {
 # --------------------------------------------------
 
 layout_box_top() {
+  local c_border="${C_BORDER:-${C_DIM:-}}"
   printf '%s%s%s%s%s%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" \
+    "$c_border" \
     "$BOX_TL" \
     "$(layout_repeat "$BOX_H" "$(( LAYOUT_WIDTH - 2 ))")" \
     "$BOX_TR" \
@@ -190,9 +235,10 @@ layout_box_top() {
 }
 
 layout_box_bottom() {
+  local c_border="${C_BORDER:-${C_DIM:-}}"
   printf '%s%s%s%s%s%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" \
+    "$c_border" \
     "$BOX_BL" \
     "$(layout_repeat "$BOX_H" "$(( LAYOUT_WIDTH - 2 ))")" \
     "$BOX_BR" \
@@ -201,9 +247,10 @@ layout_box_bottom() {
 
 # Full-width section divider.
 layout_box_separator() {
+  local c_border="${C_BORDER:-${C_DIM:-}}"
   printf '%s%s%s%s%s%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" \
+    "$c_border" \
     "$BOX_ML" \
     "$(layout_repeat "$BOX_H" "$(( LAYOUT_WIDTH - 2 ))")" \
     "$BOX_MR" \
@@ -218,6 +265,7 @@ layout_box_separator() {
 layout_box_line() {
   local text="$1"
   local color="${2:-}"
+  local c_border="${C_BORDER:-${C_DIM:-}}"
   local inner=$(( LAYOUT_WIDTH - 6 ))
   local len=${#text}
   local pad
@@ -232,24 +280,26 @@ layout_box_line() {
 
   printf '%s%s%s%s  %s%s%s%*s  %s%s%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" "$BOX_V" "${C_RESET:-}" \
+    "$c_border" "$BOX_V" "${C_RESET:-}" \
     "$color" "$text" "${C_RESET:-}" \
     "$pad" '' \
-    "${C_DIM:-}" "$BOX_V" "${C_RESET:-}"
+    "$c_border" "$BOX_V" "${C_RESET:-}"
 }
 
 # --------------------------------------------------
 # Box key/value row
 # --------------------------------------------------
 
-# layout_box_kv LABEL VALUE [VALUE_COLOR]
+# layout_box_kv LABEL VALUE [VALUE_COLOR] [LABEL_WIDTH]
 layout_box_kv() {
   local label="$1"
   local value="$2"
   local val_color="${3:-${C_WHITE:-}}"
+  local label_width="${4:-13}"
+  local c_border="${C_BORDER:-${C_DIM:-}}"
+  local c_label="${C_CYAN:-${C_ACCENT:-}}"
 
   local inner=$(( LAYOUT_WIDTH - 6 ))
-  local label_width=13
   local val_max=$(( inner - label_width - 2 ))
   local len=${#value}
   local pad
@@ -264,11 +314,11 @@ layout_box_kv() {
 
   printf '%s%s%s%s  %s%-*s%s  %s%s%s%*s  %s%s%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" "$BOX_V" "${C_RESET:-}" \
-    "${C_ACCENT:-}" "$label_width" "$label" "${C_RESET:-}" \
+    "$c_border" "$BOX_V" "${C_RESET:-}" \
+    "$c_label" "$label_width" "$label" "${C_RESET:-}" \
     "$val_color" "$value" "${C_RESET:-}" \
     "$pad" '' \
-    "${C_DIM:-}" "$BOX_V" "${C_RESET:-}"
+    "$c_border" "$BOX_V" "${C_RESET:-}"
 }
 
 # --------------------------------------------------
@@ -298,26 +348,31 @@ layout_title_right() {
       "$LAYOUT_MARGIN" \
       "${C_BOLD:-}" "$left" "${C_RESET:-}" \
       "$LAYOUT_MARGIN" \
-      "${C_DIM:-}" "$right" "${C_RESET:-}"
+      "${C_MUTED:-${C_DIM:-}}" "$right" "${C_RESET:-}"
   else
     printf '%s%s%s%s%*s%s%s%s\n' \
       "$LAYOUT_MARGIN" \
       "${C_BOLD:-}" "$left" "${C_RESET:-}" \
       "$pad" '' \
-      "${C_DIM:-}" "$right" "${C_RESET:-}"
+      "${C_MUTED:-${C_DIM:-}}" "$right" "${C_RESET:-}"
   fi
 }
 
 layout_empty() {
   printf '%s%sNothing listed yet.%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_DIM:-}" \
+    "${C_MUTED:-${C_DIM:-}}" \
     "${C_RESET:-}"
 }
 
+# Consistent, predictable navigation footer across every screen
 layout_footer() {
-  printf '%s%sb%s  Back     %sq%s  Quit\n' \
+  local c_accent="${C_ACCENT:-}"
+  local c_dim="${C_DIM:-}"
+  local c_bold="${C_BOLD:-}"
+  local c_reset="${C_RESET:-}"
+  printf '%s%s[b]%s %sBack%s     %s[q]%s %sQuit%s\n' \
     "$LAYOUT_MARGIN" \
-    "${C_ACCENT:-}" "${C_RESET:-}" \
-    "${C_ACCENT:-}" "${C_RESET:-}"
+    "$c_accent$c_bold" "$c_reset" "$c_dim" "$c_reset" \
+    "${C_ERR:-}$c_bold" "$c_reset" "$c_dim" "$c_reset"
 }

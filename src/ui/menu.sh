@@ -24,10 +24,9 @@ menu_status() {
 }
 
 # menu_items "KEY:Label" ...
-# Formats into two balanced columns with ample spacing to prevent overlapping.
-# When selected by arrows, items highlight with an active cursor indicator.
+# Formats into clean, perfectly aligned columns without ANSI width corruption.
 menu_items() {
-  local n=$# cols=1 rows i j item key label col_width
+  local n=$# cols=1 rows i j item key label col_gap=6
   local c_accent="${C_ACCENT:-}" c_err="${C_ERR:-}" c_bold="${C_BOLD:-}" c_reset="${C_RESET:-}"
   local c_white="${C_WHITE:-}" c_dim="${C_DIM:-}"
 
@@ -35,41 +34,90 @@ menu_items() {
   rows=$(( (n + cols - 1) / cols ))
   local -a items=("$@")
 
-  # Column width scales to the terminal instead of a fixed guess, so two columns never overflow.
-  col_width=$(( (LAYOUT_WIDTH - 2) / cols - 6 ))
-  (( col_width < 10 )) && col_width=10
-
   MENU_KEYS=()
   for item in "${items[@]}"; do MENU_KEYS+=("${item%%:*}"); done
+
+  # Find the maximum visible width of items in each column
+  local -a col_widths=(0 0)
+  for (( j = 0; j < n; j++ )); do
+    local c=$(( j / rows ))
+    item="${items[$j]}"
+    key="${item%%:*}"
+    label="${item#*:}"
+    # Visible text is: "  [KEY] LABEL" (prefix 2 chars + bracketed key 5 chars + space 1 + label)
+    local item_len=$(( 8 + ${#label} ))
+    if (( item_len > col_widths[c] )); then
+      col_widths[c]=$item_len
+    fi
+  done
+
+  # Add padding to column 0 so column 1 starts at a consistent, aligned offset
+  local col0_target=$(( col_widths[0] + col_gap ))
+  (( col0_target < 28 )) && col0_target=28
 
   printf '\n'
   for (( i = 0; i < rows; i++ )); do
     local line="$LAYOUT_MARGIN  "
-    for (( j = i; j < n; j += rows )); do
-      item="${items[$j]}"
+
+    # Column 0 item
+    local idx0=$i
+    if (( idx0 < n )); then
+      item="${items[$idx0]}"
       key="${item%%:*}"
       label="${item#*:}"
 
       local prefix="  "
       local key_fmt="$c_accent${c_bold}[$key]$c_reset"
+      local label_fmt="$label"
       [[ "$key" == "q" ]] && key_fmt="$c_err${c_bold}[$key]$c_reset"
 
-      if (( j == MENU_SELECTED_INDEX )); then
+      if (( idx0 == MENU_SELECTED_INDEX )); then
         prefix="${c_accent}❯ ${c_reset}"
         if [[ "$key" == "q" ]]; then
           key_fmt="$c_err${c_bold}[$key]$c_reset"
-          label="$c_err$c_bold$label$c_reset"
+          label_fmt="$c_err$c_bold$label$c_reset"
         else
           key_fmt="$c_accent${c_bold}[$key]$c_reset"
-          label="$c_white$c_bold$label$c_reset"
+          label_fmt="$c_white$c_bold$label$c_reset"
         fi
       fi
 
-      local item_rendered
-      printf -v item_rendered '%s%s %-*s' "$prefix" "$key_fmt" "$col_width" "$label"
+      # Visible length of column 0 content (without color codes) is: 2 + 1 + ${#key} + 2 + 1 + ${#label}
+      local vis_len=$(( 6 + ${#key} + ${#label} ))
+      local pad=$(( col0_target - vis_len ))
+      (( pad < 2 )) && pad=2
 
-      line="${line}${item_rendered}"
-    done
+      line="${line}${prefix}${key_fmt} ${label_fmt}$(printf '%*s' "$pad" '')"
+    fi
+
+    # Column 1 item (if present)
+    if (( cols > 1 )); then
+      local idx1=$(( i + rows ))
+      if (( idx1 < n )); then
+        item="${items[$idx1]}"
+        key="${item%%:*}"
+        label="${item#*:}"
+
+        local prefix="  "
+        local key_fmt="$c_accent${c_bold}[$key]$c_reset"
+        local label_fmt="$label"
+        [[ "$key" == "q" ]] && key_fmt="$c_err${c_bold}[$key]$c_reset"
+
+        if (( idx1 == MENU_SELECTED_INDEX )); then
+          prefix="${c_accent}❯ ${c_reset}"
+          if [[ "$key" == "q" ]]; then
+            key_fmt="$c_err${c_bold}[$key]$c_reset"
+            label_fmt="$c_err$c_bold$label$c_reset"
+          else
+            key_fmt="$c_accent${c_bold}[$key]$c_reset"
+            label_fmt="$c_white$c_bold$label$c_reset"
+          fi
+        fi
+
+        line="${line}${prefix}${key_fmt} ${label_fmt}"
+      fi
+    fi
+
     printf '%s\n' "$line"
   done
 }
@@ -98,12 +146,16 @@ section_view() {
   while :; do
     term_clear
     layout_header "$title" "$right"
-    printf '\n'
     for (( i = start; i < start + page_size && i < total; i++ )); do printf '%s\n' "${lines[$i]}"; done
-    printf '\n'
     layout_separator
     if (( start + page_size < total )); then
-      printf '%s%sb%s  Back     %sq%s  Quit     %sany key%s  More\n' "$LAYOUT_MARGIN" "$c_accent" "$c_reset" "$c_accent" "$c_reset" "$c_accent" "$c_reset"
+      local c_dim="${C_DIM:-}" c_bold="${C_BOLD:-}"
+      printf '%s%s[b]%s %sBack%s     %s[q]%s %sQuit%s     %s[Space/Enter]%s %sMore (page %d of %d)%s\n' \
+        "$LAYOUT_MARGIN" \
+        "$c_accent$c_bold" "$c_reset" "$c_dim" "$c_reset" \
+        "${C_ERR:-}$c_bold" "$c_reset" "$c_dim" "$c_reset" \
+        "$c_accent$c_bold" "$c_reset" "$c_dim" \
+        "$(( start / page_size + 1 ))" "$(( (total + page_size - 1) / page_size ))" "$c_reset"
     else
       layout_footer
     fi

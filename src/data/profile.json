@@ -21,5 +21,11 @@
     "pdf_url": "https://your-hosted-resume.pdf",
     "view_url": ""
   },
-  "github_username": "labbai-irfan"
+  "github_username": "labbai-irfan",
+  "github_stats": {
+    "total_commits": "350+",
+    "pull_requests": "25+",
+    "code_reviews": "15+",
+    "contributions": "400+"
+  }
 }

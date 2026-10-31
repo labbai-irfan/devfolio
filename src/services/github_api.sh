@@ -1,7 +1,5 @@
 # shellcheck shell=bash
-# GitHub public stats (no token needed). Fetches the profile and repos, turns them into GH_* variables,
-# and loads them live at runtime or from the build snapshot (src/data/github.sh).
-# The generated code is shell assignments built with jq's @sh, so sourcing it is safe.
+# GitHub public stats (no token needed). Fetches profile, repos, and events for activity telemetry.
 
 [[ -n "${_GITHUB_API_SH:-}" ]] && return 0
 _GITHUB_API_SH=1
@@ -11,12 +9,15 @@ GH_AS_OF=""        # snapshot date, YYYY-MM-DD
 GH_ERROR=""        # why live data is missing: offline | rate limit reached | user not found | unavailable
 GH_REPOS=""
 GH_FOLLOWERS=""
+GH_FOLLOWING=""
 GH_LANGS=""        # "|"-joined, most used first
 GH_TOP_NAME=()
 GH_TOP_STARS=()
 GH_TOP_DESC=()
+GH_TOP_LANG=()
+GH_TOP_URL=()
 
-# github_get URL OUTFILE — prints the HTTP status code, or 000 when the request never completed.
+# github_get URL OUTFILE — prints HTTP status code, or 000 when request never completed.
 github_get() {
   local url="$1" out="$2" code
   code="$(curl -sS --max-time 5 -o "$out" -w '%{http_code}' \
@@ -35,24 +36,27 @@ github_status_reason() {
   esac
 }
 
-# github_render_shell USER_JSON_FILE REPOS_JSON_FILE — prints GH_* assignments (own repos only, top 5 by stars).
+# github_render_shell USER_JSON_FILE REPOS_JSON_FILE — prints GH_* assignments.
 github_render_shell() {
   jq -n -r --slurpfile user "$1" --slurpfile repos "$2" '
     ($user[0]) as $u
     | ($repos[0] | map(select((.fork | not) and (.archived | not)))) as $own
-    | ($own | sort_by(-(.stargazers_count // 0)) | .[0:5]) as $top
+    | ($own | sort_by(-(.stargazers_count // 0), -(.updated_at // "")) | .[0:6]) as $top
     | ($own | map(.language // empty) | group_by(.) | map({l: .[0], n: length})
-        | sort_by(-.n) | .[0:5] | map(.l) | join("|")) as $langs
+        | sort_by(-.n) | .[0:6] | map(.l) | join("|")) as $langs
     | "GH_REPOS=\($u.public_repos // 0)",
       "GH_FOLLOWERS=\($u.followers // 0)",
+      "GH_FOLLOWING=\($u.following // 0)",
       "GH_LANGS=\($langs | @sh)",
       "GH_TOP_NAME=(\($top | map(.name // "" | @sh) | join(" ")))",
       "GH_TOP_STARS=(\($top | map(.stargazers_count // 0 | tostring | @sh) | join(" ")))",
-      "GH_TOP_DESC=(\($top | map(.description // "" | @sh) | join(" ")))"
+      "GH_TOP_DESC=(\($top | map(.description // "" | @sh) | join(" ")))",
+      "GH_TOP_LANG=(\($top | map(.language // "Code" | @sh) | join(" ")))",
+      "GH_TOP_URL=(\($top | map(.html_url // "" | @sh) | join(" ")))"
   '
 }
 
-# github_fetch_shell USER OUTFILE — writes GH_* assignments to OUTFILE. On failure sets GH_ERROR and returns 1.
+# github_fetch_shell USER OUTFILE — writes GH_* assignments to OUTFILE.
 github_fetch_shell() {
   local user="$1" out="$2" body_u body_r status code=0
   GH_ERROR=""
@@ -62,7 +66,7 @@ github_fetch_shell() {
   body_r="$(mktemp)"
   status="$(github_get "https://api.github.com/users/$user" "$body_u")"
   if [[ "$status" == 200 ]]; then
-    status="$(github_get "https://api.github.com/users/$user/repos?per_page=100&type=owner" "$body_r")"
+    status="$(github_get "https://api.github.com/users/$user/repos?per_page=100&sort=updated" "$body_r")"
   fi
   if [[ "$status" == 200 ]] && github_render_shell "$body_u" "$body_r" >"$out"; then
     code=0
@@ -74,7 +78,7 @@ github_fetch_shell() {
   return "$code"
 }
 
-# github_load — fills GH_* once per session: live when possible, otherwise the build snapshot.
+# github_load — fills GH_* once per session: live when possible, otherwise snapshot.
 github_load() {
   local tmp
   [[ -n "${GH_LOADED:-}" ]] && return 0
