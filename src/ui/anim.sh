@@ -22,11 +22,15 @@ anim_spin_start() {
     return 0
   fi
   (
-    local -a spin=('|' '/' '-' "\\")
-    [[ "${PLATFORM_UTF8:-0}" == 1 ]] && spin=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
-    local i=0
+    local -a morph_frames=("◐" "◓" "◑" "◒")
+    if [[ "${PLATFORM_UTF8:-0}" != 1 ]]; then
+      morph_frames=("|" "/" "-" "\\")
+    fi
+    local i=0 c_cyan="${C_CYAN:-${C_ACCENT:-}}" c_blue="${C_BLUE:-}" c_reset="${C_RESET:-}" color glyph
     while :; do
-      printf '\r%s  %s%s%s %s' "$LAYOUT_MARGIN" "${C_ACCENT:-}" "${spin[$(( i % ${#spin[@]} ))]}" "${C_RESET:-}" "$msg"
+      glyph="${morph_frames[$(( i % ${#morph_frames[@]} ))]}"
+      if (( i % 2 == 0 )); then color="$c_cyan"; else color="$c_blue"; fi
+      printf '\r%s  %s%s%s %s...\033[K' "$LAYOUT_MARGIN" "$color" "$glyph" "$c_reset" "$msg"
       i=$(( i + 1 ))
       sleep 0.08
     done

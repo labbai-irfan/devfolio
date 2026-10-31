@@ -30,7 +30,7 @@ projects_all_tags() {
 
 projects_body() {
   local i shown=0
-  local icon="◆"
+  local icon="▎"
   [[ "${PLATFORM_UTF8:-0}" != 1 ]] && icon=">"
   local feat_star="★ "
   [[ "${PLATFORM_UTF8:-0}" != 1 ]] && feat_star="*"

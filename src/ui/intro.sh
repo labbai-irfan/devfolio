@@ -9,39 +9,35 @@ _INTRO_SH=1
 intro_play() {
   [[ "${CFG_ANIMATE:-1}" == 1 && "${CFG_PLAIN:-0}" == 0 && "${PLATFORM_TTY:-0}" == 1 && "${LABBAI_REDUCED_MOTION:-0}" != 1 ]] || return 0
 
+  term_clear
+
+  # Use the native Node.js Morph Animation Engine if available
+  if command -v node >/dev/null 2>&1 && [[ -f "$APP_ROOT/src/ui/morph-spinner.js" ]]; then
+    node "$APP_ROOT/src/ui/morph-spinner.js"
+    term_clear
+    return 0
+  fi
+
   local dot="●"
   local check="✔"
-  local prompt_sym="❯"
   if [[ "${PLATFORM_UTF8:-0}" != 1 ]]; then
     dot="*"
     check="OK"
-    prompt_sym=">"
   fi
 
-  local -a spin
-  if [[ "${PLATFORM_UTF8:-0}" == 1 ]]; then
-    spin=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
-  else
-    spin=('|' '/' '-' "\\")
+  # Morph frames: ◐ -> ◓ -> ◑ -> ◒
+  local -a morph_frames=("◐" "◓" "◑" "◒")
+  if [[ "${PLATFORM_UTF8:-0}" != 1 ]]; then
+    morph_frames=("|" "/" "-" "\\")
   fi
 
-  local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
-  local c_accent="${C_ACCENT:-}"
-  local c_green="${C_GREEN:-${C_OK:-}}"
-  local c_white="${C_WHITE:-${C_BOLD:-}}"
-  local c_muted="${C_MUTED:-${C_DIM:-}}"
-  local c_dim="${C_DIM:-}"
+  # Colors: Electric Cyan, Soft Blue, Bright Green
+  local c_cyan=$'\033[38;2;0;217;255m'
+  local c_blue=$'\033[38;2;85;153;255m'
+  local c_green=$'\033[38;2;53;208;127m'
   local c_bold="${C_BOLD:-}"
   local c_reset="${C_RESET:-}"
 
-  term_clear
-
-  # 1. Elegant brand header prompt
-  printf '\n%s  %s%s%s %snpx labbai-irfan%s\n' \
-    "$LAYOUT_MARGIN" "$c_accent$c_bold" "$prompt_sym" "$c_reset" "$c_white$c_bold" "$c_reset"
-  sleep 0.08
-
-  # 2. Contextual initialization stages
   local -a steps=(
     "Detecting terminal environment"
     "Initializing developer profile"
@@ -49,28 +45,28 @@ intro_play() {
     "Rendering developer identity card"
   )
 
-  local step_idx=0
+  printf '\n'
+
+  local step_idx f glyph color
   for step_idx in "${!steps[@]}"; do
     local msg="${steps[$step_idx]}"
-    local f
-    for (( f = 0; f < 5; f++ )); do
-      local sp="${spin[$(( f % ${#spin[@]} ))]}"
-      printf '\r%s    %s%s%s %s%s…%s\033[K' \
-        "$LAYOUT_MARGIN" "$c_accent" "$sp" "$c_reset" "$c_muted" "$msg" "$c_reset"
-      sleep 0.04
+
+    for (( f = 0; f < 6; f++ )); do
+      glyph="${morph_frames[$(( f % ${#morph_frames[@]} ))]}"
+      if (( f % 2 == 0 )); then color="$c_cyan"; else color="$c_blue"; fi
+
+      printf '\r   %s%s%s %s...\033[K' "$color" "$glyph" "$c_reset" "$msg"
+      sleep 0.07
     done
 
-    # Stamp as completed with green check
-    printf '\r%s    %s%s%s %s%s%s\n' \
-      "$LAYOUT_MARGIN" "$c_green$c_bold" "$check" "$c_reset" "$c_white" "$msg" "$c_reset"
-    sleep 0.03
+    # Transform into static bright green checkmark
+    printf '\r   %s%s%s %s\033[K\n' "$c_green$c_bold" "$check" "$c_reset" "$msg"
+    sleep 0.04
   done
 
-  # 3. Brief completion confirmation
-  printf '\n%s    %s%s Ready%s\n' \
-    "$LAYOUT_MARGIN" "$c_green$c_bold" "$dot" "$c_reset"
-  sleep 0.15
+  # Ready confirmation with pulse
+  printf '\n   %s%s Ready%s\n\n' "$c_green$c_bold" "$dot" "$c_reset"
+  sleep 0.25
 
-  # Smooth transition directly into the main developer card
   term_clear
 }

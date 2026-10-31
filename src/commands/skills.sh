@@ -22,7 +22,7 @@ skills_body() {
   fi
 
   for (( i = 0; i < ${#SKILL_CATEGORY[@]}; i++ )); do
-    layout_section_title "${SKILL_CATEGORY[$i]}" "◆"
+    layout_section_title "${SKILL_CATEGORY[$i]}"
 
     items="${SKILL_ITEMS[$i]}"
     local -a item_arr=()

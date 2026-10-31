@@ -37,6 +37,7 @@ app_run() {
   fi
 
   APP_INTERACTIVE=1
+  term_alt_screen_on
   term_hide_cursor
   intro_play
   menu_loop app_main_render app_main_handle main
@@ -57,7 +58,6 @@ app_main_render() {
   card_render
   menu_items "1:About" "2:Skills" "3:Projects" "4:Career" "5:GitHub" "6:Contact" "7:Resume" "8:Portfolio" "q:Quit"
   menu_prompt
-  card_footer
 }
 
 app_main_handle() {
@@ -89,7 +89,21 @@ app_cleanup() {
   _APP_CLEANED=1
   anim_spin_stop
   if [[ "$APP_INTERACTIVE" == 1 ]]; then
+    term_alt_screen_off
     term_show_cursor
-    printf '%s\n%sThanks for stopping by %s %s%s\n\n' "$C_RESET" "$LAYOUT_MARGIN" "$ICON_DOT" "$PROFILE_URL_PORTFOLIO" "$C_RESET"
+    local c_green="${C_GREEN:-${C_OK:-}}"
+    local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
+    local c_dim="${C_DIM:-${C_MUTED:-}}"
+    local c_bold="${C_BOLD:-}"
+    local c_reset="${C_RESET:-}"
+
+    printf '\n%s%s✔%s %sSession closed%s  %s·%s  Portfolio: %s%s%s  %s·%s  GitHub: %s@%s%s\n\n' \
+      "$LAYOUT_MARGIN" \
+      "$c_green$c_bold" "$c_reset" \
+      "$c_bold" "$c_reset" \
+      "$c_dim" "$c_reset" \
+      "$c_cyan" "$PROFILE_URL_PORTFOLIO" "$c_reset" \
+      "$c_dim" "$c_reset" \
+      "$c_cyan" "$PROFILE_GITHUB_USER" "$c_reset"
   fi
 }

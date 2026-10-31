@@ -49,7 +49,7 @@ github_body() {
   printf '\n'
 
   # 2. Activity & Engagement Metrics
-  layout_section_title "ACTIVITY & COLLABORATION" "◆"
+  layout_section_title "ACTIVITY & COLLABORATION"
   layout_kv "Username" "@$PROFILE_GITHUB_USER" 18 "$c_cyan" "$c_white"
   layout_kv "Public Repos" "${GH_REPOS:-14}" 18 "$c_cyan" "$c_white"
   layout_kv "Total Commits" "${PROFILE_GH_COMMITS:-350+}" 18 "$c_cyan" "$c_white"
@@ -63,7 +63,7 @@ github_body() {
   # 3. Primary Languages Ecosystem
   langs="$(validate_sanitize "${GH_LANGS:-TypeScript|JavaScript|HCL|HTML|Shell|Python}")"
   if [[ -n "$langs" ]]; then
-    layout_section_title "PRIMARY LANGUAGES" "◆"
+    layout_section_title "PRIMARY LANGUAGES"
     local -a lang_arr=()
     IFS='|' read -r -a lang_arr <<< "$langs"
     layout_tag_pills "${lang_arr[@]}"
@@ -72,7 +72,7 @@ github_body() {
 
   # 4. Featured & Active Repositories
   if (( ${#GH_TOP_NAME[@]} > 0 )); then
-    layout_section_title "ACTIVE & FEATURED REPOSITORIES" "◆"
+    layout_section_title "ACTIVE & FEATURED REPOSITORIES"
 
     for (( i = 0; i < ${#GH_TOP_NAME[@]}; i++ )); do
       name="$(validate_sanitize "${GH_TOP_NAME[$i]}")"

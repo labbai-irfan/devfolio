@@ -106,10 +106,25 @@ career_timeline_body() {
     local date="${TIMELINE_DATE[$i]}"
     local end_date="${TIMELINE_END[$i]:-}"
     local kind="${TIMELINE_KIND[$i]}"
-    local title="${TIMELINE_TITLE[$i]}"
-    local subtitle="${TIMELINE_SUBTITLE[$i]}"
+    local title="${TIMELINE_TITLE[$i]:-}"
+    local subtitle="${TIMELINE_SUBTITLE[$i]:-}"
     local loc="${TIMELINE_LOC[$i]:-}"
     local desc="${TIMELINE_DESC[$i]:-}"
+    local text="${TIMELINE_TEXT[$i]:-}"
+
+    # If title is empty, parse from TIMELINE_TEXT
+    if [[ -z "$title" && -n "$text" ]]; then
+      if [[ "$text" == *" at "* ]]; then
+        title="${text%% at *}"
+        subtitle="${text#* at }"
+      elif [[ "$text" == *", "* ]]; then
+        title="${text%%, *}"
+        subtitle="${text#*, }"
+      else
+        title="$text"
+        subtitle=""
+      fi
+    fi
 
     # Category color accent & badge styling
     local kind_col="$c_cyan"
@@ -148,10 +163,12 @@ career_timeline_body() {
     # 3. Stem connector + Subtitle: │  Wisetech MEP Consultants Pvt. Ltd. · Mumbai, India
     local sub_info="$subtitle"
     [[ -n "$loc" ]] && sub_info="$sub_info · $loc"
-    printf '%s%s%s%s  %s%s%s\n' \
-      "$LAYOUT_MARGIN" \
-      "$c_dim" "$rule" "$c_reset" \
-      "$c_muted" "$sub_info" "$c_reset"
+    if [[ -n "$sub_info" ]]; then
+      printf '%s%s%s%s  %s%s%s\n' \
+        "$LAYOUT_MARGIN" \
+        "$c_dim" "$rule" "$c_reset" \
+        "$c_muted" "$sub_info" "$c_reset"
+    fi
 
     # 4. Stem connector + Highlight / Description summary (if present)
     if [[ -n "$desc" ]]; then

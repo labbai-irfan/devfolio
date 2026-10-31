@@ -124,7 +124,8 @@ const lines = [
   a('TIMELINE_TITLE', tl.map(x => x.title)),
   a('TIMELINE_SUBTITLE', tl.map(x => x.subtitle)),
   a('TIMELINE_LOC', tl.map(x => x.loc)),
-  a('TIMELINE_DESC', tl.map(x => x.desc))
+  a('TIMELINE_DESC', tl.map(x => x.desc)),
+  a('TIMELINE_TEXT', tl.map(x => `${x.title} at ${x.subtitle}`))
 ];
 
 fs.writeFileSync(path.join(dataDir, 'profile.sh'), lines.join('\n') + '\n', 'utf8');

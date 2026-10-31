@@ -32,9 +32,17 @@ term_supports_utf8() {
   [[ -n "${WT_SESSION:-}" || -n "${MSYSTEM:-}" ]]
 }
 
-term_clear()       { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[H\033[2J'; return 0; }
-term_hide_cursor() { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[?25l'; return 0; }
-term_show_cursor() { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[?25h'; return 0; }
+term_clear() {
+  if [[ "${PLATFORM_TTY:-0}" == 1 ]]; then
+    # \033[2J clears visible viewport, \033[H positions cursor at top-left
+    printf '\033[2J\033[H'
+  fi
+  return 0
+}
+term_alt_screen_on()  { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[?1049h\033[H'; return 0; }
+term_alt_screen_off() { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[?1049l'; return 0; }
+term_hide_cursor()    { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[?25l'; return 0; }
+term_show_cursor()    { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[?25h'; return 0; }
 
 # term_read_key VAR — reads one key into VAR. Returns 1 on EOF (stdin closed).
 term_read_key() {

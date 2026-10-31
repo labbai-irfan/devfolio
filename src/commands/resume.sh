@@ -45,7 +45,10 @@ resume_download() {
   anim_spin_stop
 
   if (( code == 0 )); then
-    menu_status ok "Resume saved to ${path/#$HOME/~}"
+    local clean_path="${path/#$HOME/~}"
+    clean_path="${clean_path/#\/c\//C:\/}"
+    clean_path="${clean_path//\//\\}"
+    menu_status ok "Resume saved to: $clean_path"
   else
     case "$code" in
       1) menu_status warn "curl is not installed, so the PDF cannot be downloaded. Open online: $online" ;;

@@ -71,10 +71,15 @@ layout_repeat() {
 
 layout_separator() {
   local c_border="${C_BORDER:-${C_DIM:-}}"
+  local avail_width=${PLATFORM_WIDTH:-$LAYOUT_WIDTH}
+  (( avail_width > 80 )) && avail_width=80
+  local w=$(( avail_width - ${#LAYOUT_MARGIN} * 2 ))
+  (( w < 20 )) && w=$LAYOUT_WIDTH
+
   printf '%s%s%s%s\n' \
     "$LAYOUT_MARGIN" \
     "$c_border" \
-    "$(layout_repeat "$BOX_H" "$LAYOUT_WIDTH")" \
+    "$(layout_repeat "$BOX_H" "$w")" \
     "${C_RESET:-}"
 }
 
@@ -109,30 +114,64 @@ layout_header() {
 # Reusable section heading for interior screens (About, Career, Skills, etc.)
 layout_section_title() {
   local title="$1"
-  local icon="${2:-◆}"
-  [[ "${PLATFORM_UTF8:-0}" != 1 ]] && icon=">"
-  printf '\n%s%s%s %s%s\n' \
+  local icon="${2:-}"
+  local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
+  local c_white="${C_WHITE:-${C_BOLD:-}}"
+  local c_border="${C_BORDER:-${C_DIM:-}}"
+  local c_reset="${C_RESET:-}"
+
+  if [[ -z "$icon" || "$icon" == "◆" ]]; then
+    if [[ "${PLATFORM_UTF8:-0}" == 1 ]]; then
+      icon="▎"
+    else
+      icon="|"
+    fi
+  fi
+
+  local title_len=${#title}
+  local icon_len=${#icon}
+  # Calculate full terminal width dynamically to span edge-to-edge
+  local avail_width=${PLATFORM_WIDTH:-$LAYOUT_WIDTH}
+  (( avail_width > 80 )) && avail_width=80
+  local pad=$(( avail_width - title_len - icon_len - ${#LAYOUT_MARGIN} - 4 ))
+  (( pad < 3 )) && pad=3
+
+  local rule
+  rule="$(layout_repeat "$BOX_H" "$pad")"
+
+  printf '\n%s%s%s %s%s %s%s%s\n\n' \
     "$LAYOUT_MARGIN" \
-    "${C_ACCENT:-}${C_BOLD:-}" \
-    "$icon" \
-    "$title" \
-    "${C_RESET:-}"
+    "$c_cyan" "$icon" \
+    "$c_white" "$title" \
+    "$c_border" "$rule" \
+    "$c_reset"
 }
 
 # Reusable technical badge tag list: layout_tag_pills "Git" "Docker" "AWS" ...
 layout_tag_pills() {
   local -a tags=("$@")
-  local line="$LAYOUT_MARGIN  "
-  local t
   local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
-  local c_dim="${C_DIM:-}"
   local c_reset="${C_RESET:-}"
+  local prefix="$LAYOUT_MARGIN  "
+  local line="$prefix"
+  local line_len=4
+  local t pill pill_len
 
   for t in "${tags[@]}"; do
     [[ -z "$t" ]] && continue
-    line="${line}${c_cyan}[${c_reset}${t}${c_cyan}]${c_reset} "
+    pill="${c_cyan}[${c_reset}${t}${c_cyan}]${c_reset} "
+    pill_len=$(( ${#t} + 3 ))
+
+    if (( line_len + pill_len > LAYOUT_WIDTH && line_len > 4 )); then
+      printf '%s\n' "$line"
+      line="${prefix}${pill}"
+      line_len=$(( 4 + pill_len ))
+    else
+      line="${line}${pill}"
+      line_len=$(( line_len + pill_len ))
+    fi
   done
-  printf '%s\n' "$line"
+  [[ -n "$line" && "$line" != "$prefix" ]] && printf '%s\n' "$line"
 }
 
 # --------------------------------------------------
