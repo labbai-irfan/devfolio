@@ -24,12 +24,17 @@ career_handle() {
 }
 
 # Newest first, merged from dated experience, education and certifications (built by scripts/build.sh).
+# Rendered as a vertical timeline: a node per entry, connected by a line to the next.
 career_timeline_body() {
-  local i
+  local i last node="●" rule="│"
+  [[ "${PLATFORM_UTF8:-0}" != 1 ]] && { node="o"; rule="|"; }
   if (( ${#TIMELINE_DATE[@]} == 0 )); then layout_empty; return 0; fi
+  last=$(( ${#TIMELINE_DATE[@]} - 1 ))
   for (( i = 0; i < ${#TIMELINE_DATE[@]}; i++ )); do
-    printf '%s%s%-8s%s %s%-14s%s %s\n' "$LAYOUT_MARGIN" "$C_DIM" "${TIMELINE_DATE[$i]}" "$C_RESET" \
-      "$C_ACCENT" "${TIMELINE_KIND[$i]}" "$C_RESET" "${TIMELINE_TEXT[$i]}"
+    printf '%s%s%s%s %s%-8s%s %s%s%s\n' "$LAYOUT_MARGIN" "$C_ACCENT" "$node" "$C_RESET" \
+      "$C_DIM" "${TIMELINE_DATE[$i]}" "$C_RESET" "$C_BOLD" "${TIMELINE_KIND[$i]}" "$C_RESET"
+    layout_wrap "${TIMELINE_TEXT[$i]}" "$rule  "
+    (( i < last )) && printf '%s%s%s%s\n' "$LAYOUT_MARGIN" "$C_DIM" "$rule" "$C_RESET"
   done
   return 0
 }

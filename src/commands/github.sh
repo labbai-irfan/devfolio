@@ -5,8 +5,10 @@
 _CMD_GITHUB_SH=1
 
 cmd_github() {
-  printf '\n%s   %sLoading GitHub…%s\n' "$LAYOUT_MARGIN" "$C_DIM" "$C_RESET"
+  printf '\n'
+  anim_spin_start "Connecting to GitHub…"
   github_load
+  anim_spin_stop
   menu_loop github_render github_handle
 }
 

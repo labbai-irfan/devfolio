@@ -154,11 +154,17 @@ layout_wrap() {
 # Key / value display
 # --------------------------------------------------
 
-# layout_kv LABEL VALUE [LABEL_WIDTH]
+# layout_kv LABEL VALUE [LABEL_WIDTH] — value is truncated with an ellipsis so the line never
+# overflows LAYOUT_WIDTH, since (unlike layout_wrap) it never breaks onto a second line.
 layout_kv() {
   local label="$1"
   local value="$2"
   local label_width="${3:-12}"
+  local max=$(( LAYOUT_WIDTH - label_width ))
+
+  if (( max > 1 )) && (( ${#value} > max )); then
+    value="${value:0:$(( max - 1 ))}…"
+  fi
 
   printf '%s%s%-*s%s%s\n' \
     "$LAYOUT_MARGIN" \

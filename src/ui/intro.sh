@@ -6,7 +6,7 @@
 _INTRO_SH=1
 
 intro_play() {
-  [[ "${CFG_ANIMATE:-1}" == 1 && "${CFG_PLAIN:-0}" == 0 && "${PLATFORM_TTY:-0}" == 1 ]] || return 0
+  [[ "${CFG_ANIMATE:-1}" == 1 && "${CFG_PLAIN:-0}" == 0 && "${PLATFORM_TTY:-0}" == 1 && "${LABBAI_REDUCED_MOTION:-0}" != 1 ]] || return 0
 
   local cmd="whoami" i
   local -a spin

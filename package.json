@@ -22,10 +22,10 @@
     "node": ">=18"
   },
   "scripts": {
-    "start": "cmd /c \"\"C:\\Program Files\\Git\\bin\\bash.exe\" bin/labbai-irfan\"",
-    "build": "cmd /c \"\"C:\\Program Files\\Git\\bin\\bash.exe\" scripts/build.sh\"",
-    "validate": "cmd /c \"\"C:\\Program Files\\Git\\bin\\bash.exe\" scripts/validate-data.sh\"",
-    "release:check": "cmd /c \"\"C:\\Program Files\\Git\\bin\\bash.exe\" scripts/release-check.sh\"",
-    "prepack": "cmd /c \"\"C:\\Program Files\\Git\\bin\\bash.exe\" scripts/build.sh\""
+    "start": "node bin/labbai-irfan.js",
+    "build": "node scripts/run-bash.js scripts/build.sh",
+    "validate": "node scripts/run-bash.js scripts/validate-data.sh",
+    "release:check": "node scripts/run-bash.js scripts/release-check.sh",
+    "prepack": "node scripts/run-bash.js scripts/build.sh"
   }
 }

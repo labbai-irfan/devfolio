@@ -17,7 +17,7 @@ Options:
       --plain          No colors, no box drawing, ASCII only.
       --no-color       Disable colors (same as NO_COLOR=1).
       --interactive    Force interactive mode even without a detected TTY.
-      --no-animation   Skip the start-up animation.
+      --no-animation   Skip animations (also LABBAI_REDUCED_MOTION=1).
   -h, --help           Show this help and exit.
   -v, --version        Show version and exit.
 EOF

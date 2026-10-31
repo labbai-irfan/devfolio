@@ -24,15 +24,19 @@ resume_handle() {
 }
 
 resume_download() {
-  local path online
+  local path online code
   if [[ -z "$PROFILE_RESUME_PDF" ]]; then menu_status warn "No resume PDF available."; return 0; fi
   online="${PROFILE_RESUME_VIEW:-$PROFILE_RESUME_PDF}"
 
-  printf '%s   %sDownloading…%s\n' "$LAYOUT_MARGIN" "$C_DIM" "$C_RESET"
-  if path="$(download_pdf "$PROFILE_RESUME_PDF" "${PROFILE_NAME// /-}-Resume.pdf")"; then
+  anim_spin_start "Downloading résumé…"
+  path="$(download_pdf "$PROFILE_RESUME_PDF" "${PROFILE_NAME// /-}-Resume.pdf")"
+  code=$?
+  anim_spin_stop
+
+  if (( code == 0 )); then
     menu_status ok "Resume saved to ${path/#$HOME/~}"
   else
-    case $? in
+    case "$code" in
       1) menu_status warn "curl is not installed, so the PDF cannot be downloaded. Open it online instead: $online" ;;
       3) menu_status err "The resume link did not return a PDF. Open it online instead: $online" ;;
       *) menu_status err "Download failed (offline or link unavailable). Open it online instead: $online" ;;

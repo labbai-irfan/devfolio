@@ -10,6 +10,7 @@ _MENU_SH=1
 MENU_STATUS=""   # one-line feedback shown under the menu until the next key press
 MENU_DONE=""
 MENU_SELECTED_INDEX=0
+MENU_KEYS=()      # keys drawn by the most recent menu_items call, in argument order
 
 # menu_status LEVEL TEXT — LEVEL is ok | warn | err | hint
 menu_status() {
@@ -26,13 +27,20 @@ menu_status() {
 # Formats into two balanced columns with ample spacing to prevent overlapping.
 # When selected by arrows, items highlight with an active cursor indicator.
 menu_items() {
-  local n=$# cols=1 rows i j item key label col_width=28
+  local n=$# cols=1 rows i j item key label col_width
   local c_accent="${C_ACCENT:-}" c_err="${C_ERR:-}" c_bold="${C_BOLD:-}" c_reset="${C_RESET:-}"
   local c_white="${C_WHITE:-}" c_dim="${C_DIM:-}"
 
   (( n > 4 )) && layout_has_box && cols=2
   rows=$(( (n + cols - 1) / cols ))
   local -a items=("$@")
+
+  # Column width scales to the terminal instead of a fixed guess, so two columns never overflow.
+  col_width=$(( (LAYOUT_WIDTH - 2) / cols - 6 ))
+  (( col_width < 10 )) && col_width=10
+
+  MENU_KEYS=()
+  for item in "${items[@]}"; do MENU_KEYS+=("${item%%:*}"); done
 
   printf '\n'
   for (( i = 0; i < rows; i++ )); do
@@ -43,16 +51,16 @@ menu_items() {
       label="${item#*:}"
 
       local prefix="  "
-      local key_fmt="$c_accent$c_bold[$key]$c_reset"
-      [[ "$key" == "q" ]] && key_fmt="$c_err$c_bold[$key]$c_reset"
+      local key_fmt="$c_accent${c_bold}[$key]$c_reset"
+      [[ "$key" == "q" ]] && key_fmt="$c_err${c_bold}[$key]$c_reset"
 
       if (( j == MENU_SELECTED_INDEX )); then
         prefix="${c_accent}❯ ${c_reset}"
         if [[ "$key" == "q" ]]; then
-          key_fmt="$c_err$c_bold[$key]$c_reset"
+          key_fmt="$c_err${c_bold}[$key]$c_reset"
           label="$c_err$c_bold$label$c_reset"
         else
-          key_fmt="$c_accent$c_bold[$key]$c_reset"
+          key_fmt="$c_accent${c_bold}[$key]$c_reset"
           label="$c_white$c_bold$label$c_reset"
         fi
       fi
@@ -147,15 +155,8 @@ menu_loop() {
     "$render"
     input_key="$(term_read_input)" || app_quit
 
-    # Determine total items on this screen
-    local -a current_keys=()
-    case "$render" in
-      app_main_render) current_keys=(1 2 3 4 5 6 7 8 q) ;;
-      contact_render)  current_keys=(1 2 3 4 5 6) ;;
-      career_render)   current_keys=(1 2 3) ;;
-      *)               current_keys=() ;;
-    esac
-    local total_items=${#current_keys[@]}
+    # menu_items (called by render, just above) filled MENU_KEYS with this screen's actual keys.
+    local total_items=${#MENU_KEYS[@]}
 
     case "$input_key" in
       UP|LEFT)
@@ -172,7 +173,7 @@ menu_loop() {
         ;;
       ENTER)
         if (( total_items > 0 && MENU_SELECTED_INDEX < total_items )); then
-          input_key="${current_keys[$MENU_SELECTED_INDEX]}"
+          input_key="${MENU_KEYS[$MENU_SELECTED_INDEX]}"
         else
           continue
         fi
@@ -193,7 +194,7 @@ menu_loop() {
     if (( total_items > 0 )); then
       local idx
       for (( idx = 0; idx < total_items; idx++ )); do
-        if [[ "${current_keys[$idx]}" == "$input_key" ]]; then
+        if [[ "${MENU_KEYS[$idx]}" == "$input_key" ]]; then
           MENU_SELECTED_INDEX=$idx
           break
         fi

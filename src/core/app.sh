@@ -87,6 +87,7 @@ app_internal_error() {
 app_cleanup() {
   [[ "$_APP_CLEANED" == 1 ]] && return 0
   _APP_CLEANED=1
+  anim_spin_stop
   if [[ "$APP_INTERACTIVE" == 1 ]]; then
     term_show_cursor
     printf '%s\n%sThanks for stopping by %s %s%s\n\n' "$C_RESET" "$LAYOUT_MARGIN" "$ICON_DOT" "$PROFILE_URL_PORTFOLIO" "$C_RESET"

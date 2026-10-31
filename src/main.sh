@@ -25,6 +25,8 @@ source "$APP_ROOT/src/ui/menu.sh"
 source "$APP_ROOT/src/ui/card.sh"
 # shellcheck source=ui/intro.sh
 source "$APP_ROOT/src/ui/intro.sh"
+# shellcheck source=ui/anim.sh
+source "$APP_ROOT/src/ui/anim.sh"
 
 # shellcheck source=services/browser.sh
 source "$APP_ROOT/src/services/browser.sh"
