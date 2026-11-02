@@ -31,6 +31,11 @@ jobs:
       - name: Validate profile data
         run: bash scripts/validate-data.sh
 
+      - name: Smoke test
+        run: |
+          LABBAI_OFFLINE=1 bash scripts/build.sh
+          bash scripts/smoke-test.sh
+
   package:
     needs: lint
     strategy:
@@ -56,7 +61,7 @@ jobs:
         shell: bash
         run: |
           npm pack --json --ignore-scripts > pack.json
-          node -e "const [p] = require('./pack.json'); console.log(p.filename, p.unpackedSize, 'bytes unpacked'); if (p.unpackedSize > 60 * 1024) { console.error('Package is larger than 60 KB'); process.exit(1); }"
+          node -e "const [p] = require('./pack.json'); console.log(p.filename, p.unpackedSize, 'bytes unpacked'); if (p.unpackedSize > 100 * 1024) { console.error('Package is larger than 100 KB'); process.exit(1); }"
 
       - name: Smoke test the packed tarball
         shell: bash

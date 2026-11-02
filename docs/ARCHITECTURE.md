@@ -31,7 +31,9 @@ Services return status codes and never call `exit`. Commands turn those codes in
 
 ## Interactive loop
 
-`menu_loop` in `ui/menu.sh` does one thing: clear the screen, call the render function, read one key, and pass the key to a handler. `q` quits from anywhere, and `b` returns to the previous screen. Each submenu is a `menu_loop` of its own. Read-only sections use `section_view`, which pages long content.
+`menu_loop` in `ui/menu.sh` renders the screen, reads one key, and either moves the selection (arrows) or passes the key to a handler (number/letter keys, or Enter on the selected item). `q` quits from anywhere, and `b`/Esc returns to the previous screen. Each submenu is a `menu_loop` of its own and restores the parent selection on return. Read-only sections use `section_view`, which scrolls by line (arrows, mouse wheel) or by page (Space, PgUp/PgDn).
+
+Every frame is rendered into a temp-file buffer and written in one go (`screen_paint`), so repaints do not flicker. Arrow-only redraws are skipped while more keys are already queued, so a burst of keys costs one repaint. The terminal is put in the alternate screen with SGR mouse reporting on: the mouse wheel then arrives as a mouse event (scrolls pages, ignored in menus) instead of being turned into arrow keys by the terminal. A resize (`SIGWINCH`) interrupts the key read and re-lays the screen out.
 
 A handler sets `MENU_DONE` when it wants to leave its screen. Only the project tag picker does this today.
 

@@ -26,6 +26,7 @@
     "build": "node scripts/run-bash.js scripts/build.sh",
     "validate": "node scripts/run-bash.js scripts/validate-data.sh",
     "release:check": "node scripts/run-bash.js scripts/release-check.sh",
-    "prepack": "node scripts/run-bash.js scripts/build.sh"
+    "prepack": "node scripts/run-bash.js scripts/build.sh",
+    "test": "node scripts/run-bash.js scripts/smoke-test.sh"
   }
 }

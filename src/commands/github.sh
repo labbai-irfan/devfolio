@@ -1,24 +1,35 @@
 # shellcheck shell=bash
-# Section 5 — GitHub: Complete developer activity, telemetry, commits, PRs & repositories.
+# Section 5 — GitHub: public stats (live, or the dated build snapshot), languages, top repositories.
+# Nothing is shown that did not come from the API, except numbers from profile.json, which are
+# labelled as self-reported.
 
 [[ -n "${_CMD_GITHUB_SH:-}" ]] && return 0
 _CMD_GITHUB_SH=1
 
 cmd_github() {
   printf '\n'
-  anim_spin_start "Syncing GitHub developer telemetry…"
+  anim_spin_start "Loading GitHub profile"
   github_load
+  github_sanitize
   anim_spin_stop
   menu_loop github_render github_handle
 }
 
+# Strips terminal control sequences from API text once, so redraws don't re-run it.
+github_sanitize() {
+  local i
+  GH_LANGS="$(validate_sanitize "$GH_LANGS")"
+  for (( i = 0; i < ${#GH_TOP_NAME[@]}; i++ )); do
+    GH_TOP_NAME[i]="$(validate_sanitize "${GH_TOP_NAME[i]}")"
+    GH_TOP_DESC[i]="$(validate_sanitize "${GH_TOP_DESC[i]:-}")"
+  done
+}
+
 github_render() {
-  layout_header "GitHub Telemetry" "@$PROFILE_GITHUB_USER"
+  layout_header "GitHub" "@$PROFILE_GITHUB_USER"
   github_body
-  printf '\n'
-  menu_items "o:Open GitHub profile" "r:Explore Repositories on Web"
+  menu_items "o:Open GitHub profile" "r:Open repositories"
   menu_prompt
-  layout_footer
 }
 
 github_handle() {
@@ -30,73 +41,44 @@ github_handle() {
 }
 
 github_body() {
-  local i name desc langs stars lang url
-  local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
-  local c_accent="${C_ACCENT:-}"
-  local c_green="${C_GREEN:-${C_OK:-}}"
-  local c_white="${C_WHITE:-${C_BOLD:-}}"
-  local c_muted="${C_MUTED:-${C_DIM:-}}"
-  local c_dim="${C_DIM:-}"
-  local c_bold="${C_BOLD:-}"
-  local c_reset="${C_RESET:-}"
-
-  # 1. Telemetry Status
+  local i meta muted="${C_MUTED:-${C_DIM:-}}" label="${C_CYAN:-${C_ACCENT:-}}${C_BOLD:-}"
+  local commits="${PROFILE_GH_COMMITS:-}" prs="${PROFILE_GH_PRS:-}" reviews="${PROFILE_GH_REVIEWS:-}" contribs="${PROFILE_GH_CONTRIBS:-}"
+  printf '\n'
   case "$GH_SOURCE" in
-    live)     layout_wrap "Live telemetry synced via GitHub REST API." "  " "$c_muted" ;;
-    snapshot) layout_wrap "Telemetry snapshot as of $GH_AS_OF (offline mode)." "  " "$c_muted" ;;
-    *)        layout_wrap "Telemetry snapshot as of $GH_AS_OF." "  " "$c_muted" ;;
+    live)     layout_wrap "Live from the GitHub API." "" "$muted" ;;
+    snapshot) layout_wrap "Snapshot from $GH_AS_OF. Live data is unavailable${GH_ERROR:+ ($GH_ERROR)}." "" "$muted" ;;
+    *)        layout_wrap "GitHub data is unavailable${GH_ERROR:+ ($GH_ERROR)}. Press o to open the profile." "" "$muted" ;;
   esac
-  printf '\n'
 
-  # 2. Activity & Engagement Metrics
-  layout_section_title "ACTIVITY & COLLABORATION"
-  layout_kv "Username" "@$PROFILE_GITHUB_USER" 18 "$c_cyan" "$c_white"
-  layout_kv "Public Repos" "${GH_REPOS:-14}" 18 "$c_cyan" "$c_white"
-  layout_kv "Total Commits" "${PROFILE_GH_COMMITS:-350+}" 18 "$c_cyan" "$c_white"
-  layout_kv "Pull Requests" "${PROFILE_GH_PRS:-25+}" 18 "$c_cyan" "$c_white"
-  layout_kv "Contributions" "${PROFILE_GH_CONTRIBS:-400+}" 18 "$c_cyan" "$c_green"
-  layout_kv "Followers" "${GH_FOLLOWERS:-0}" 18 "$c_cyan" "$c_white"
-  layout_kv "Following" "${GH_FOLLOWING:-2}" 18 "$c_cyan" "$c_white"
-  layout_kv "Profile" "https://github.com/$PROFILE_GITHUB_USER" 18 "$c_cyan" "$c_white"
-  printf '\n'
-
-  # 3. Primary Languages Ecosystem
-  langs="$(validate_sanitize "${GH_LANGS:-TypeScript|JavaScript|HCL|HTML|Shell|Python}")"
-  if [[ -n "$langs" ]]; then
-    layout_section_title "PRIMARY LANGUAGES"
-    local -a lang_arr=()
-    IFS='|' read -r -a lang_arr <<< "$langs"
-    layout_tag_pills "${lang_arr[@]}"
+  if [[ "$GH_SOURCE" != none ]]; then
     printf '\n'
+    layout_kv "Public repos" "$GH_REPOS" 15 "$label"
+    layout_kv "Followers" "$GH_FOLLOWERS" 15 "$label"
+    [[ -n "${GH_FOLLOWING:-}" ]] && layout_kv "Following" "$GH_FOLLOWING" 15 "$label"
+    [[ -n "$GH_LANGS" ]] && layout_list 15 "Languages" "$GH_LANGS"
   fi
 
-  # 4. Featured & Active Repositories
+  if [[ -n "$commits$prs$reviews$contribs" ]]; then
+    printf '\n'
+    layout_section_title "SELF-REPORTED"
+    [[ -n "$commits" ]] && layout_kv "Commits" "$commits" 15 "$label"
+    [[ -n "$prs" ]] && layout_kv "Pull requests" "$prs" 15 "$label"
+    [[ -n "$reviews" ]] && layout_kv "Code reviews" "$reviews" 15 "$label"
+    [[ -n "$contribs" ]] && layout_kv "Contributions" "$contribs" 15 "$label"
+  fi
+
   if (( ${#GH_TOP_NAME[@]} > 0 )); then
-    layout_section_title "ACTIVE & FEATURED REPOSITORIES"
-
+    printf '\n'
+    layout_section_title "REPOSITORIES"
     for (( i = 0; i < ${#GH_TOP_NAME[@]}; i++ )); do
-      name="$(validate_sanitize "${GH_TOP_NAME[$i]}")"
-      desc="$(validate_sanitize "${GH_TOP_DESC[$i]}")"
-      stars="${GH_TOP_STARS[$i]:-0}"
-      lang="${GH_TOP_LANG[$i]:-Code}"
-      url="${GH_TOP_URL[$i]:-https://github.com/$PROFILE_GITHUB_USER/$name}"
-
-      # Title row with language badge & stars
-      local star_info=""
-      (( stars > 0 )) && star_info=" · ★ $stars"
-      printf '%s  %s%s%s  %s[%s%s]%s\n' \
-        "$LAYOUT_MARGIN" "$c_white$c_bold" "$name" "$c_reset" \
-        "$c_cyan" "$lang" "$star_info" "$c_reset"
-
-      # Description or fallback
-      if [[ -n "$desc" ]]; then
-        layout_wrap "$desc" "    " "$c_muted"
-      else
-        printf '%s    %sNo description provided%s\n' "$LAYOUT_MARGIN" "$c_muted" "$c_reset"
-      fi
-
-      # Direct repo URL link
-      printf '%s    %s🔗 %s%s\n\n' "$LAYOUT_MARGIN" "$c_muted" "$url" "$c_reset"
+      (( i > 0 )) && printf '\n'
+      meta="${GH_TOP_LANG[i]:-}"
+      [[ "${GH_TOP_STARS[i]:-0}" != 0 ]] && meta="${meta:+$meta  }$ICON_STAR ${GH_TOP_STARS[i]}"
+      layout_title_right "  ${GH_TOP_NAME[i]}" "$meta"
+      [[ -n "${GH_TOP_DESC[i]:-}" ]] && layout_wrap "${GH_TOP_DESC[i]}" "  " "$muted"
+      # owner/repo is enough on the GitHub screen, and fits narrow terminals.
+      [[ -n "${GH_TOP_URL[i]:-}" ]] && printf '%s  %s%s%s\n' "$LAYOUT_MARGIN" "${C_CYAN:-${C_ACCENT:-}}" "${GH_TOP_URL[i]#https://github.com/}" "${C_RESET:-}"
     done
   fi
+  return 0
 }

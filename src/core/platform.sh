@@ -8,6 +8,7 @@ PLATFORM_OS="unknown"   # linux | macos | wsl | gitbash | unknown
 PLATFORM_TTY=0
 PLATFORM_UTF8=0
 PLATFORM_WIDTH=80
+PLATFORM_HEIGHT=24
 PLATFORM_OPENER=""      # command that opens a URL, empty if none found
 PLATFORM_CLIPBOARD=""   # command that copies stdin, empty if none found
 
@@ -22,9 +23,10 @@ platform_detect() {
   if term_is_tty; then PLATFORM_TTY=1; fi
   if [[ "${CFG_PLAIN:-0}" != 1 ]] && term_supports_utf8; then PLATFORM_UTF8=1; fi
   PLATFORM_WIDTH="$(term_width)"
+  PLATFORM_HEIGHT="$(term_height)"
   platform_detect_tools
 
-  log_debug "os=$PLATFORM_OS tty=$PLATFORM_TTY utf8=$PLATFORM_UTF8 width=$PLATFORM_WIDTH opener=$PLATFORM_OPENER clipboard=$PLATFORM_CLIPBOARD"
+  log_debug "os=$PLATFORM_OS tty=$PLATFORM_TTY utf8=$PLATFORM_UTF8 size=${PLATFORM_WIDTH}x$PLATFORM_HEIGHT opener=$PLATFORM_OPENER clipboard=$PLATFORM_CLIPBOARD"
 }
 
 # platform_first_command CANDIDATE... — prints the first candidate that exists on PATH.

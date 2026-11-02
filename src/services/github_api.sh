@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# GitHub public stats (no token needed). Fetches profile, repos, and events for activity telemetry.
+# GitHub public stats (no token needed): profile counts, top languages and top own repositories,
+# loaded live at runtime or from the dated build snapshot (src/data/github.sh).
 
 [[ -n "${_GITHUB_API_SH:-}" ]] && return 0
 _GITHUB_API_SH=1
@@ -41,7 +42,7 @@ github_render_shell() {
   jq -n -r --slurpfile user "$1" --slurpfile repos "$2" '
     ($user[0]) as $u
     | ($repos[0] | map(select((.fork | not) and (.archived | not)))) as $own
-    | ($own | sort_by(-(.stargazers_count // 0), -(.updated_at // "")) | .[0:6]) as $top
+    | ($own | sort_by(.updated_at // "") | reverse | sort_by(-(.stargazers_count // 0)) | .[0:6]) as $top
     | ($own | map(.language // empty) | group_by(.) | map({l: .[0], n: length})
         | sort_by(-.n) | .[0:6] | map(.l) | join("|")) as $langs
     | "GH_REPOS=\($u.public_repos // 0)",
@@ -51,7 +52,7 @@ github_render_shell() {
       "GH_TOP_NAME=(\($top | map(.name // "" | @sh) | join(" ")))",
       "GH_TOP_STARS=(\($top | map(.stargazers_count // 0 | tostring | @sh) | join(" ")))",
       "GH_TOP_DESC=(\($top | map(.description // "" | @sh) | join(" ")))",
-      "GH_TOP_LANG=(\($top | map(.language // "Code" | @sh) | join(" ")))",
+      "GH_TOP_LANG=(\($top | map(.language // "" | @sh) | join(" ")))",
       "GH_TOP_URL=(\($top | map(.html_url // "" | @sh) | join(" ")))"
   '
 }

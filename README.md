@@ -6,7 +6,9 @@ An interactive developer card for your terminal. Run it, and a short card appear
 npx labbai-irfan
 ```
 
-Use the number keys to move around: About, Skills, Projects, Career, GitHub, Contact, Resume and Portfolio. `b` goes back and `q` quits.
+Press a number, or use the arrow keys and Enter, to open About, Skills, Projects, Career, GitHub, Contact, Resume and Portfolio. `b` or Esc goes back and `q` quits. On long pages, the arrow keys, the mouse wheel, Space/PgUp/PgDn and Home/End scroll.
+
+The app captures the mouse so the wheel scrolls its pages instead of moving the menu. To select text with the mouse, hold Shift while dragging (Option on macOS).
 
 > The package is not published to npm yet. Until it is, run it from a clone (see [DEVELOPMENT.md](docs/DEVELOPMENT.md)).
 
@@ -28,7 +30,7 @@ Use the number keys to move around: About, Skills, Projects, Career, GitHub, Con
 | `--plain` | No colors, no box drawing, plain ASCII. Good for screen readers. |
 | `--no-color` | Turn off colors. Same as `NO_COLOR=1`. |
 | `--interactive` | Run the menu even when output is not a terminal. |
-| `--no-animation` | Skip the one-second start-up animation. |
+| `--no-animation` | Skip animations (the short intro and loading spinners). |
 | `-h`, `--help` | Show help. |
 | `-v`, `--version` | Show version. |
 
@@ -41,6 +43,7 @@ When output is piped (`npx labbai-irfan | cat`), the app prints the static card 
 | `NO_COLOR` | Turn off colors. |
 | `LABBAI_THEME` | Default theme. |
 | `LABBAI_OFFLINE=1` | Never use the network. |
+| `LABBAI_REDUCED_MOTION=1` | Same as `--no-animation`. |
 | `LABBAI_DEBUG=1` | Print debug messages to stderr. |
 
 ## Platform notes

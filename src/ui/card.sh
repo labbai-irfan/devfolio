@@ -1,102 +1,66 @@
 # shellcheck shell=bash
 # The developer card shown on the main screen and in static (--card / piped) mode.
-# Master crafted terminal UI/UX for Labbai Irfan.
+# Compact mode (short terminals) keeps every fact but drops the decorative separator and focus rows.
 
 [[ -n "${_CARD_SH:-}" ]] && return 0
 _CARD_SH=1
 
-CARD_ANIM_SHOWN=0
-
-# Clean display URLs: strips protocol and trailing slash for elegant presentation
+# card_clean_url VAR URL — URL without protocol and trailing slash, for display.
 card_clean_url() {
-  local u="$1"
-  u="${u#https://}"
+  local u="${2#https://}"
   u="${u#http://}"
-  u="${u%/}"
-  printf '%s' "$u"
+  printf -v "$1" '%s' "${u%/}"
 }
 
 card_render() {
-  local is_static=0
-  if [[ "${CFG_ACTION:-}" == "card" || "${PLATFORM_TTY:-0}" != 1 || "${CFG_INTERACTIVE:-0}" != 1 ]]; then
-    is_static=1
-  fi
+  local portfolio github linkedin focus="" f
+  local cyan="${C_CYAN:-${C_ACCENT:-}}" green="${C_GREEN:-${C_OK:-}}" white="${C_WHITE:-${C_BOLD:-}}"
+  local muted="${C_MUTED:-${C_DIM:-}}" b="${C_BOLD:-}" r="${C_RESET:-}"
+  local tagline="$QUOTE_OPEN$PROFILE_TAGLINE$QUOTE_CLOSE"
 
-  local dot="●"
-  [[ "${PLATFORM_UTF8:-0}" != 1 ]] && dot="*"
+  card_clean_url portfolio "${PROFILE_URL_PORTFOLIO:-}"
+  card_clean_url github "${PROFILE_URL_GITHUB:-}"
+  card_clean_url linkedin "${PROFILE_URL_LINKEDIN:-}"
+  for f in ${PROFILE_FOCUS[@]+"${PROFILE_FOCUS[@]}"}; do
+    focus="${focus:+$focus  $ICON_DOT  }$f"
+  done
+  # Footer comes from profile.json "focus", uppercased (tr: bash 3 has no ${f^^}).
+  focus="$(printf '%s' "$focus" | tr '[:lower:]' '[:upper:]')"
 
-  # Colors with safe fallback
-  local c_accent="${C_ACCENT:-}"
-  local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
-  local c_green="${C_GREEN:-${C_OK:-}}"
-  local c_white="${C_WHITE:-${C_BOLD:-}}"
-  local c_muted="${C_MUTED:-${C_DIM:-}}"
-  local c_dim="${C_DIM:-}"
-  local c_bold="${C_BOLD:-}"
-  local c_reset="${C_RESET:-}"
-
-  # Cleaned URLs
-  local disp_portfolio disp_github disp_linkedin disp_email
-  disp_portfolio="$(card_clean_url "${PROFILE_URL_PORTFOLIO:-}")"
-  disp_github="$(card_clean_url "${PROFILE_URL_GITHUB:-}")"
-  disp_linkedin="$(card_clean_url "${PROFILE_URL_LINKEDIN:-}")"
-  disp_email="${PROFILE_EMAIL:-}"
-
-  if layout_has_box; then
-    layout_box_top
-
-    # Section 1: Identity & Professional Focus
-    layout_box_line "$PROFILE_NAME" "$c_bold$c_accent"
-    layout_box_line "$PROFILE_TITLE" "$c_cyan"
-    layout_box_separator
-
-    # Section 2: Core Tagline & Engineering Philosophy
-    layout_box_line "“$PROFILE_TAGLINE”" "$c_bold$c_white"
-    layout_box_separator
-
-    # Section 3: Location & Career Availability
-    [[ -n "${PROFILE_LOCATION:-}" ]] && layout_box_kv "LOCATION" "$PROFILE_LOCATION" "$c_white" 14
-    if [[ -n "${PROFILE_AVAILABILITY:-}" ]]; then
-      layout_box_kv "AVAILABILITY" "$dot $PROFILE_AVAILABILITY" "$c_green" 14
-    fi
-    layout_box_separator
-
-    # Section 4: Verified Channels & Links
-    [[ -n "$disp_portfolio" ]] && layout_box_kv "PORTFOLIO" "$disp_portfolio" "$c_white" 14
-    [[ -n "$disp_github" ]]    && layout_box_kv "GITHUB"    "$disp_github" "$c_white" 14
-    [[ -n "$disp_linkedin" ]]  && layout_box_kv "LINKEDIN"  "$disp_linkedin" "$c_white" 14
-    [[ -n "$disp_email" ]]     && layout_box_kv "EMAIL"     "$disp_email" "$c_white" 14
-    layout_box_separator
-
-    # Section 5: Subtle Architectural Badge
-    layout_box_line "SOFTWARE ENGINEERING  ·  DEVOPS  ·  CLOUD INFRASTRUCTURE" "$c_muted"
-    layout_box_bottom
-
-  else
-    # Responsive clean fallback for narrow mobile terminals
-    printf '%s%s%s%s\n' "$LAYOUT_MARGIN" "$c_bold$c_accent" "$PROFILE_NAME" "$c_reset"
-    layout_wrap "$PROFILE_TITLE" "" "$c_cyan"
-    layout_wrap "“$PROFILE_TAGLINE”" "" "$c_bold$c_white"
-    [[ -n "${PROFILE_LOCATION:-}" ]] && layout_kv "LOCATION" "$PROFILE_LOCATION" 14
-    [[ -n "${PROFILE_AVAILABILITY:-}" ]] && layout_kv "STATUS" "$dot $PROFILE_AVAILABILITY" 14
+  if ! layout_has_box; then
+    printf '%s%s%s%s\n' "$LAYOUT_MARGIN" "$b${C_ACCENT:-}" "$PROFILE_NAME" "$r"
+    layout_wrap "$PROFILE_TITLE" "" "$cyan"
+    [[ -n "$PROFILE_TAGLINE" ]] && layout_wrap "$tagline" "" "$b$white"
+    printf '\n'
+    [[ -n "$PROFILE_LOCATION" ]] && layout_kv "LOCATION" "$PROFILE_LOCATION" 12
+    [[ -n "$PROFILE_AVAILABILITY" ]] && layout_kv "STATUS" "$ICON_BULLET $PROFILE_AVAILABILITY" 12 "" "$green"
     layout_separator
-    [[ -n "$disp_portfolio" ]] && layout_kv "PORTFOLIO" "$disp_portfolio" 14
-    [[ -n "$disp_github" ]]    && layout_kv "GITHUB"    "$disp_github" 14
-    [[ -n "$disp_linkedin" ]]  && layout_kv "LINKEDIN"  "$disp_linkedin" 14
-    [[ -n "$disp_email" ]]     && layout_kv "EMAIL"     "$disp_email" 14
+    [[ -n "$portfolio" ]] && layout_kv "PORTFOLIO" "$portfolio" 12
+    [[ -n "$github" ]] && layout_kv "GITHUB" "$github" 12
+    [[ -n "$linkedin" ]] && layout_kv "LINKEDIN" "$linkedin" 12
+    [[ -n "$PROFILE_EMAIL" ]] && layout_kv "EMAIL" "$PROFILE_EMAIL" 12
+    [[ -n "$focus" ]] && { layout_separator; layout_wrap "$focus" "" "$muted"; }
+    return 0
   fi
 
-  return 0
-}
+  layout_box_top
+  layout_box_line "$PROFILE_NAME" "$b${C_ACCENT:-}"
+  layout_box_line "$PROFILE_TITLE" "$cyan"
+  [[ -n "$PROFILE_TAGLINE" ]] && layout_box_line "$tagline" "$b$white"
+  layout_box_separator
 
-# Right-aligned professional version badge under menu.
-card_footer() {
-  local c_accent="${C_ACCENT:-}"
-  local c_muted="${C_MUTED:-${C_DIM:-}}"
-  local c_reset="${C_RESET:-}"
-  local badge="${c_accent}npx $APP_NAME${c_reset} ${c_muted}· v$APP_VERSION${c_reset}"
-  local plain="npx $APP_NAME · v$APP_VERSION"
-  local pad=$(( LAYOUT_WIDTH - ${#plain} ))
-  (( pad < 0 )) && pad=0
-  printf '%s%*s%s\n' "$LAYOUT_MARGIN" "$pad" '' "$badge"
+  [[ -n "$PROFILE_LOCATION" ]] && layout_box_kv "LOCATION" "$PROFILE_LOCATION" "$white" 14
+  [[ -n "$PROFILE_AVAILABILITY" ]] && layout_box_kv "AVAILABILITY" "$ICON_BULLET $PROFILE_AVAILABILITY" "$green" 14
+  layout_box_separator
+
+  [[ -n "$portfolio" ]] && layout_box_kv "PORTFOLIO" "$portfolio" "$white" 14
+  [[ -n "$github" ]] && layout_box_kv "GITHUB" "$github" "$white" 14
+  [[ -n "$linkedin" ]] && layout_box_kv "LINKEDIN" "$linkedin" "$white" 14
+  [[ -n "$PROFILE_EMAIL" ]] && layout_box_kv "EMAIL" "$PROFILE_EMAIL" "$white" 14
+
+  if [[ -n "$focus" ]]; then
+    layout_box_separator
+    layout_box_line "$focus" "$muted"
+  fi
+  layout_box_bottom
 }

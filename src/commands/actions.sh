@@ -10,7 +10,7 @@ action_open() {
   local url="$1" what="${2:-link}"
   if [[ -z "$url" ]]; then menu_status warn "No $what available."; return 0; fi
   if browser_open "$url"; then
-    menu_status ok "Opening $url …"
+    menu_status ok "Opening $url"
   else
     case $? in
       1) menu_status warn "No browser opener found. Here is the $what: $url" ;;

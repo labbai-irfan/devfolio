@@ -14,6 +14,7 @@ app_run() {
   case "$CFG_ACTION" in
     help)    args_usage; exit "$EXIT_OK" ;;
     version) printf '%s %s\n' "$APP_NAME" "$APP_VERSION"; exit "$EXIT_OK" ;;
+    json)    app_print_json; exit "$EXIT_OK" ;;
   esac
 
   platform_detect
@@ -28,15 +29,18 @@ app_run() {
   trap app_internal_error ERR
 
   if [[ "$CFG_ACTION" == card || ( "$PLATFORM_TTY" != 1 && "$CFG_INTERACTIVE" != 1 ) ]]; then
+    printf '\n'
     card_render
     if (( PLATFORM_WIDTH < 40 )); then
-      printf '\n%s%sWiden the terminal to 40+ columns for the full card.%s\n' "$LAYOUT_MARGIN" "$C_DIM" "$C_RESET"
+      printf '\n'
+      layout_wrap "Widen the terminal to 40+ columns for the full card." "" "${C_DIM:-}"
     fi
     printf '\n'
     exit "$EXIT_OK"
   fi
 
   APP_INTERACTIVE=1
+  SCREEN_BUF="$(mktemp 2>/dev/null || true)"
   term_alt_screen_on
   term_hide_cursor
   intro_play
@@ -52,6 +56,18 @@ app_load_data() {
   fi
   # shellcheck source=/dev/null
   source "$data"
+}
+
+# --json: the raw profile data as one JSON object, for scripts and tools. No jq needed.
+app_print_json() {
+  local f sep=""
+  printf '{'
+  for f in profile skills projects experience education certifications; do
+    printf '%s"%s":' "$sep" "$f"
+    tr -d '\r' <"$APP_ROOT/src/data/$f.json"
+    sep=","
+  done
+  printf '}\n'
 }
 
 app_main_render() {
@@ -83,27 +99,40 @@ app_internal_error() {
   exit "$EXIT_ERROR"
 }
 
-# Runs once on any exit: restore the terminal, say goodbye in interactive mode.
+# Runs once on any exit: stop animations, restore the terminal, say goodbye in interactive mode.
 app_cleanup() {
   [[ "$_APP_CLEANED" == 1 ]] && return 0
   _APP_CLEANED=1
   anim_spin_stop
+  [[ -n "$SCREEN_BUF" ]] && rm -f "$SCREEN_BUF"
   if [[ "$APP_INTERACTIVE" == 1 ]]; then
     term_alt_screen_off
     term_show_cursor
-    local c_green="${C_GREEN:-${C_OK:-}}"
-    local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
-    local c_dim="${C_DIM:-${C_MUTED:-}}"
-    local c_bold="${C_BOLD:-}"
-    local c_reset="${C_RESET:-}"
-
-    printf '\n%s%s✔%s %sSession closed%s  %s·%s  Portfolio: %s%s%s  %s·%s  GitHub: %s@%s%s\n\n' \
-      "$LAYOUT_MARGIN" \
-      "$c_green$c_bold" "$c_reset" \
-      "$c_bold" "$c_reset" \
-      "$c_dim" "$c_reset" \
-      "$c_cyan" "$PROFILE_URL_PORTFOLIO" "$c_reset" \
-      "$c_dim" "$c_reset" \
-      "$c_cyan" "$PROFILE_GITHUB_USER" "$c_reset"
+    app_goodbye
   fi
+  return 0
+}
+
+# Sign-off left in the terminal after quitting, written like an email signature:
+#   Thanks for your time.  — Labbai Irfan
+#   ● Open to DevOps & Cloud Engineering opportunities
+#   labbaiirfan09@gmail.com  ·  labbaiirfan.vercel.app
+# One aligned column, one blank line above, none below (shells add their own before the prompt).
+app_goodbye() {
+  local r="${C_RESET:-}" m="$LAYOUT_MARGIN" cyan="${C_CYAN:-${C_ACCENT:-}}" site sep dash="—"
+  [[ "${PLATFORM_UTF8:-0}" == 1 ]] || dash="-"
+  card_clean_url site "$PROFILE_URL_PORTFOLIO"
+  sep="  ${C_MUTED:-${C_DIM:-}}$ICON_DOT$r  "
+  # Email and site on separate lines when both would not fit.
+  (( ${#PROFILE_EMAIL} + ${#site} + 5 > LAYOUT_WIDTH )) && sep=$'\n'"$m"
+
+  printf '\n%s%sThanks for your time.%s  %s%s %s%s\n' "$m" "${C_BOLD:-}" "$r" \
+    "${C_MUTED:-${C_DIM:-}}" "$dash" "${C_ACCENT:-}${C_BOLD:-}$PROFILE_NAME" "$r"
+  [[ -n "$PROFILE_AVAILABILITY" ]] && printf '%s%s%s%s %s\n' "$m" "${C_GREEN:-${C_OK:-}}" "$ICON_BULLET" "$r" "$PROFILE_AVAILABILITY"
+  if [[ -n "$PROFILE_EMAIL" && -n "$site" ]]; then
+    printf '%s%s%s%s%s%s%s%s\n' "$m" "$cyan" "$PROFILE_EMAIL" "$r" "$sep" "$cyan" "$site" "$r"
+  elif [[ -n "$PROFILE_EMAIL$site" ]]; then
+    printf '%s%s%s%s\n' "$m" "$cyan" "$PROFILE_EMAIL$site" "$r"
+  fi
+  return 0
 }

@@ -63,5 +63,5 @@ The `release.yml` workflow then runs the checks and publishes to npm (`latest`, 
 
 ## Known gaps
 
-- The Bats test suites are not written yet. CI runs ShellCheck, syntax checks, data validation and the package smoke test.
+- `npm test` runs `scripts/smoke-test.sh`: the static card at five widths (ASCII and no-color modes), the flags, a scripted walk through every interactive screen, and checks that the mouse wheel and arrow keys never jump the selection to Quit. CI runs it along with ShellCheck, syntax checks, data validation and the package smoke test.
 - The app has not been run on every target platform yet. The manual checklist in the plan (§16.2) is still open.

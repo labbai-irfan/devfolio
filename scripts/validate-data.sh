@@ -64,7 +64,11 @@ $profile[0] as $p | $skills[0] as $sk | $projects[0] as $pr
       ( $p.contact.whatsapp as $w
         | if ($w | blank) or ($w | ph) or ($w | tostring | test("^[0-9]{8,15}$")) then empty
           else err("profile.json: contact.whatsapp must be 8-15 digits (country code + number)") end ),
-      maxlen("profile.json: tagline"; $p.tagline; 60)
+      maxlen("profile.json: tagline"; $p.tagline; 60),
+      ( if ($p.focus == null) or ($p.focus | type == "array" and all(type == "string")) then empty
+        else err("profile.json: focus must be an array of strings") end ),
+      ( if ($p.github_stats == null) or ($p.github_stats | type == "object") then empty
+        else err("profile.json: github_stats must be an object") end )
     end )
 , arr("skills.json"; $sk), arr("projects.json"; $pr), arr("experience.json"; $ex)
 , arr("education.json"; $ed), arr("certifications.json"; $ce)
@@ -73,7 +77,13 @@ $profile[0] as $p | $skills[0] as $sk | $projects[0] as $pr
 , ( ($pr | arrays | to_entries[]) as {key: $i, value: $x}
     | req("projects.json[\($i)].name"; $x.name),
       url("projects.json[\($i)].url"; $x.url),
-      maxlen("projects.json[\($i)].description"; $x.description; 140) )
+      maxlen("projects.json[\($i)].description"; $x.description; 140),
+      ( if ($x.featured == null) or ($x.featured | type == "boolean") then empty
+        else err("projects.json[\($i)].featured must be true or false") end ),
+      ( if ($x.status == null) or ($x.status | type == "string") then empty
+        else err("projects.json[\($i)].status must be a string") end ),
+      ( if ($x.category == null) or ($x.category | type == "string") then empty
+        else err("projects.json[\($i)].category must be a string") end ) )
 , ( ($ex | arrays | to_entries[]) as {key: $i, value: $x}
     | req("experience.json[\($i)].role"; $x.role),
       req("experience.json[\($i)].company"; $x.company),

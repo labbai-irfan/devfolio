@@ -1,51 +1,64 @@
 # shellcheck shell=bash
-# Section 6 — Contact Screen Transformation: Interactive channels with clear visual feedback.
+# Section 6 — Contact: a grid of the channels that are filled in (empty ones are hidden, not shown as
+# "n/a"); the selected channel's address shows under the grid. c/u copy.
 
 [[ -n "${_CMD_CONTACT_SH:-}" ]] && return 0
 _CMD_CONTACT_SH=1
 
+CONTACT_ACTIONS=()   # action for menu key N is CONTACT_ACTIONS[N-1]: email | whatsapp | linkedin | github | portfolio
+
 cmd_contact() { menu_loop contact_render contact_handle; }
 
-# contact_item KEY LABEL VALUE — label with a dim "(not available)" suffix when VALUE is empty.
+# contact_item VAR KEY LABEL VALUE — "KEY:LABEL", or "KEY:LABEL (n/a)" (dimmed by the menu) when VALUE
+# is empty. Writes into VAR so renders stay subshell-free. Also used by the Resume screen.
 contact_item() {
-  if [[ -n "$3" ]]; then
-    printf '%s:%s' "$1" "$2"
-  else
-    printf '%s:%s %s(n/a)%s' "$1" "$2" "${C_MUTED:-${C_DIM:-}}" "${C_RESET:-}"
-  fi
+  if [[ -n "$4" ]]; then printf -v "$1" '%s:%s' "$2" "$3"; else printf -v "$1" '%s:%s (n/a)' "$2" "$3"; fi
 }
 
 contact_render() {
-  local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
-  local c_white="${C_WHITE:-${C_BOLD:-}}"
-  local c_muted="${C_MUTED:-${C_DIM:-}}"
+  local portfolio linkedin github k
+  local -a items=() details=()
+  card_clean_url portfolio "$PROFILE_URL_PORTFOLIO"
+  card_clean_url linkedin "$PROFILE_URL_LINKEDIN"
+  card_clean_url github "$PROFILE_URL_GITHUB"
 
-  layout_header "Connect & Reach Out" "Direct Channels"
+  CONTACT_ACTIONS=()
+  # contact_add ACTION LABEL VALUE — adds a numbered channel only when VALUE is set.
+  contact_add() {
+    [[ -n "$3" ]] || return 0
+    CONTACT_ACTIONS+=("$1")
+    k=${#CONTACT_ACTIONS[@]}
+    items+=("$k:$2")
+    details+=("$3")
+  }
+  contact_add email "Email" "$PROFILE_EMAIL"
+  contact_add whatsapp "WhatsApp" "${PROFILE_WHATSAPP:++$PROFILE_WHATSAPP}"
+  contact_add linkedin "LinkedIn" "$linkedin"
+  contact_add github "GitHub" "$github"
+  contact_add portfolio "Portfolio" "$portfolio"
+  if [[ -n "$PROFILE_EMAIL" ]]; then items+=("c:Copy email"); details+=("Copies $PROFILE_EMAIL"); fi
+  if [[ -n "$portfolio" ]]; then items+=("u:Copy portfolio URL"); details+=("Copies $PROFILE_URL_PORTFOLIO"); fi
 
-  layout_section_title "CONTACT DETAILS"
-  [[ -n "$PROFILE_EMAIL" ]] && layout_kv "Email" "$PROFILE_EMAIL" 14 "$c_cyan" "$c_white"
-  [[ -n "$PROFILE_WHATSAPP" ]] && layout_kv "WhatsApp" "+$PROFILE_WHATSAPP" 14 "$c_cyan" "$c_white"
-  [[ -n "$PROFILE_LOCATION" ]] && layout_kv "Location" "$PROFILE_LOCATION" 14 "$c_cyan" "$c_white"
-  [[ -n "$PROFILE_URL_PORTFOLIO" ]] && layout_kv "Portfolio" "$PROFILE_URL_PORTFOLIO" 14 "$c_cyan" "$c_white"
-  [[ -n "$PROFILE_URL_LINKEDIN" ]] && layout_kv "LinkedIn" "$PROFILE_URL_LINKEDIN" 14 "$c_cyan" "$c_white"
-  [[ -n "$PROFILE_URL_GITHUB" ]] && layout_kv "GitHub" "$PROFILE_URL_GITHUB" 14 "$c_cyan" "$c_white"
-
-  layout_section_title "QUICK ACTIONS"
-  menu_items \
-    "$(contact_item 1 "Send email" "$PROFILE_EMAIL")" \
-    "$(contact_item 2 "Open WhatsApp" "$PROFILE_WHATSAPP")" \
-    "$(contact_item 3 "Open LinkedIn" "$PROFILE_URL_LINKEDIN")" \
-    "$(contact_item 4 "Open GitHub" "$PROFILE_URL_GITHUB")"
+  layout_header "Contact"
+  if (( ${#items[@]} == 0 )); then printf '\n'; layout_empty; fi
+  MENU_DETAILS=(${details[@]+"${details[@]}"})
+  menu_items ${items[@]+"${items[@]}"}
   menu_prompt
-  layout_footer
 }
 
 contact_handle() {
+  local action=""
   case "$1" in
-    1) if [[ -n "$PROFILE_EMAIL" ]]; then action_open "mailto:$PROFILE_EMAIL" "email address"; else menu_status warn "No email address available."; fi ;;
-    2) if [[ -n "$PROFILE_WHATSAPP" ]]; then action_open "https://wa.me/$PROFILE_WHATSAPP" "WhatsApp chat"; else menu_status warn "No WhatsApp number available."; fi ;;
-    3) action_open "$PROFILE_URL_LINKEDIN" "LinkedIn link" ;;
-    4) action_open "$PROFILE_URL_GITHUB" "GitHub link" ;;
+    [1-9]) action="${CONTACT_ACTIONS[$1 - 1]:-}" ;;
+    c|C) [[ -n "$PROFILE_EMAIL" ]] || return 1; action_copy "$PROFILE_EMAIL" "Email address"; return 0 ;;
+    u|U) [[ -n "$PROFILE_URL_PORTFOLIO" ]] || return 1; action_copy "$PROFILE_URL_PORTFOLIO" "Portfolio URL"; return 0 ;;
+  esac
+  case "$action" in
+    email)     action_open "mailto:$PROFILE_EMAIL" "email address" ;;
+    whatsapp)  action_open "https://wa.me/$PROFILE_WHATSAPP" "WhatsApp link" ;;
+    linkedin)  action_open "$PROFILE_URL_LINKEDIN" "LinkedIn link" ;;
+    github)    action_open "$PROFILE_URL_GITHUB" "GitHub link" ;;
+    portfolio) action_open "$PROFILE_URL_PORTFOLIO" "portfolio link" ;;
     *) return 1 ;;
   esac
 }

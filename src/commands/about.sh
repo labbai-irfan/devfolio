@@ -1,52 +1,36 @@
 # shellcheck shell=bash
-# Section 1 — About Screen Transformation.
-# Structured narrative: Introduction, Current Focus & Philosophy, Snapshot & Engineering Journey.
+# Section 1 — About: quick facts at a glance (current role, location, status, focus areas),
+# then the profile paragraphs.
 
 [[ -n "${_CMD_ABOUT_SH:-}" ]] && return 0
 _CMD_ABOUT_SH=1
 
-cmd_about() { section_view "About Me" about_body; }
+cmd_about() { section_view "About" about_body "$PROFILE_NAME"; }
 
 about_body() {
-  local p
-  local dot="●"
-  [[ "${PLATFORM_UTF8:-0}" != 1 ]] && dot="*"
+  local i role="" label="${C_CYAN:-${C_ACCENT:-}}${C_BOLD:-}" focus=""
+  local -a titles=("PROFILE" "CURRENT FOCUS")
 
-  local c_cyan="${C_CYAN:-${C_ACCENT:-}}"
-  local c_accent="${C_ACCENT:-}"
-  local c_green="${C_GREEN:-${C_OK:-}}"
-  local c_white="${C_WHITE:-${C_BOLD:-}}"
-  local c_muted="${C_MUTED:-${C_DIM:-}}"
-  local c_dim="${C_DIM:-}"
-  local c_bold="${C_BOLD:-}"
-  local c_reset="${C_RESET:-}"
+  # Current role: the first experience entry that has not ended.
+  for (( i = 0; i < ${#EXPERIENCE_ROLE[@]}; i++ )); do
+    if [[ "${EXPERIENCE_END[i]}" == present ]]; then
+      role="${EXPERIENCE_ROLE[i]} at ${EXPERIENCE_COMPANY[i]}"
+      break
+    fi
+  done
+  local IFS='|'
+  focus="${PROFILE_FOCUS[*]-}"
+  IFS=$' \t\n'
 
-  # 1. Professional Introduction
-  layout_section_title "PROFESSIONAL PROFILE"
-  if (( ${#PROFILE_ABOUT[@]} > 0 )); then
-    layout_wrap "${PROFILE_ABOUT[0]}" "  " "$c_white"
-  else
-    layout_empty
-  fi
-  printf '\n'
+  [[ -n "$role" ]] && layout_kv "Role" "$role" 11 "$label"
+  [[ -n "$PROFILE_LOCATION" ]] && layout_kv "Based in" "$PROFILE_LOCATION" 11 "$label"
+  [[ -n "$PROFILE_AVAILABILITY" ]] && layout_kv "Status" "$ICON_BULLET $PROFILE_AVAILABILITY" 11 "$label" "${C_GREEN:-${C_OK:-}}"
+  [[ -n "$focus" ]] && layout_list 11 "Areas" "$focus"
 
-  # 2. Current Engineering Focus
-  layout_section_title "CURRENT TECHNICAL FOCUS"
-  if (( ${#PROFILE_ABOUT[@]} > 1 )); then
-    layout_wrap "${PROFILE_ABOUT[1]}" "  " "$c_muted"
-  fi
-  printf '\n'
-
-  # Core Pillars Pill Badges
-  layout_tag_pills "DevOps & CI/CD" "Cloud Architecture" "Docker" "AWS" "Linux & Shell" "Automation"
-  printf '\n'
-
-  # 3. Quick Snapshot / Status
-  layout_section_title "PROFILE SNAPSHOT"
-  layout_kv "Role" "$PROFILE_TITLE" 14 "$c_cyan" "$c_white"
-  [[ -n "$PROFILE_LOCATION" ]] && layout_kv "Location" "$PROFILE_LOCATION" 14 "$c_cyan" "$c_white"
-  [[ -n "$PROFILE_AVAILABILITY" ]] && layout_kv "Availability" "$dot $PROFILE_AVAILABILITY" 14 "$c_cyan" "$c_green"
-  [[ -n "$PROFILE_EMAIL" ]] && layout_kv "Contact" "$PROFILE_EMAIL" 14 "$c_cyan" "$c_white"
-
+  for (( i = 0; i < ${#PROFILE_ABOUT[@]}; i++ )); do
+    printf '\n'
+    (( i < ${#titles[@]} )) && layout_section_title "${titles[i]}"
+    layout_wrap "${PROFILE_ABOUT[i]}" "  " "${C_WHITE:-}"
+  done
   return 0
 }

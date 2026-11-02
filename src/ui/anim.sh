@@ -30,7 +30,7 @@ anim_spin_start() {
     while :; do
       glyph="${morph_frames[$(( i % ${#morph_frames[@]} ))]}"
       if (( i % 2 == 0 )); then color="$c_cyan"; else color="$c_blue"; fi
-      printf '\r%s  %s%s%s %s...\033[K' "$LAYOUT_MARGIN" "$color" "$glyph" "$c_reset" "$msg"
+      printf '\r%s  %s%s%s %s\033[K' "$LAYOUT_MARGIN" "$color" "$glyph" "$c_reset" "$msg"
       i=$(( i + 1 ))
       sleep 0.08
     done
