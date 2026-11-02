@@ -4,6 +4,14 @@
   "description": "Interactive developer card for Labbai Irfan, right in your terminal.",
   "author": "Labbai Irfan",
   "license": "MIT",
+  "homepage": "https://github.com/labbai-irfan/devfolio#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/labbai-irfan/devfolio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/labbai-irfan/devfolio/issues"
+  },
   "keywords": [
     "cli",
     "bash",

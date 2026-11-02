@@ -21,7 +21,15 @@ platform_detect() {
   esac
 
   if term_is_tty; then PLATFORM_TTY=1; fi
-  if [[ "${CFG_PLAIN:-0}" != 1 ]] && term_supports_utf8; then PLATFORM_UTF8=1; fi
+  if [[ "${CFG_PLAIN:-0}" != 1 ]] && term_supports_utf8; then
+    PLATFORM_UTF8=1
+    # The terminal is UTF-8 but the locale may not say so (npx from PowerShell/cmd starts Bash with no
+    # LANG). Bash would then count "●" as 3 characters and the card's borders would drift.
+    case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+      *[Uu][Tt][Ff]-8*|*[Uu][Tt][Ff]8*) ;;
+      *) if [[ -n "${LC_ALL:-}" ]]; then export LC_ALL=C.UTF-8; else export LC_CTYPE=C.UTF-8; fi 2>/dev/null ;;
+    esac
+  fi
   PLATFORM_WIDTH="$(term_width)"
   PLATFORM_HEIGHT="$(term_height)"
   platform_detect_tools

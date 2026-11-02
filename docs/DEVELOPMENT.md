@@ -4,25 +4,26 @@
 
 | Tool | Needed for | Required |
 |---|---|---|
-| Bash 3.2+ | running the app | yes |
-| Node.js 18+ and npm | `npx` launcher, packing and publishing | yes |
-| jq | building and validating the profile data | yes |
-| ShellCheck | linting | yes (CI runs it too) |
-| curl | resume download, GitHub stats | optional at runtime |
+| Bash 3.2+ | running the app and every script | yes |
+| Node.js 18+ and npm | the `npx` launcher, packing and publishing | yes |
+| jq | validating and building the profile data | yes |
+| ShellCheck | linting | yes for changes (CI runs it too) |
+| curl | live GitHub data and the resume download | optional |
 
-On Windows, install [Git for Windows](https://gitforwindows.org) for Git Bash. Use Git Bash for every command below.
+On Windows, install [Git for Windows](https://gitforwindows.org) for Git Bash. The `npm` scripts find Git Bash themselves, so they work from PowerShell or cmd too.
 
 ## Common commands
 
 ```bash
-npm run build          # validate data, then compile it for Bash
-npm run validate       # validate only
-npm run start          # run the app (after a build)
+npm run build          # validate the data, then compile it for Bash (+ GitHub snapshot)
+npm start              # run the app (after a build)
+npm test               # smoke tests (after a build)
+npm run validate       # validate the data only
 npm run release:check  # pre-release gate (see Releasing)
-shellcheck bin/labbai-irfan && find scripts src -name '*.sh' -exec shellcheck {} +
+shellcheck bin/labbai-irfan scripts/*.sh src/*/*.sh
 ```
 
-`npm run build` must run after any change to `src/data/*.json`. The app reads the generated files (profile.sh, github.sh), not the JSON.
+The app reads the generated `src/data/profile.sh` and `src/data/github.sh`, not the JSON, so run `npm run build` after every change to `src/data/*.json`.
 
 ## Updating the profile
 
@@ -30,37 +31,53 @@ shellcheck bin/labbai-irfan && find scripts src -name '*.sh' -exec shellcheck {}
 
    | File | Holds |
    |---|---|
-   | `profile.json` | name, title, tagline, about, location, links, contact, resume, GitHub username |
+   | `profile.json` | name, title, tagline, `about` paragraphs, `focus` areas (card footer and About), location, availability, links, contact, resume URLs, GitHub username, optional `github_stats` (shown as self-reported) |
    | `skills.json` | skill categories and their items |
-   | `projects.json` | projects, with name, description, tags and URL |
-   | `experience.json` | jobs, with dates and highlights |
-   | `education.json` | degrees |
-   | `certifications.json` | certifications, with optional verify links |
+   | `projects.json` | name, description, `tags`, `url`, and optional `category`, `status` (e.g. `In Production`, `Completed`) and `featured` (`true`/`false`) |
+   | `experience.json` | jobs, with `start`/`end` dates and highlights (the first highlight appears on the timeline) |
+   | `education.json` | degrees, with optional notes |
+   | `certifications.json` | certifications, with an optional verification link |
 
-2. Run `npm run build`. Fix any errors it reports.
-3. Run `npm run start` and check the screens you changed.
+2. Run `npm run build` and fix any errors it reports.
+3. Run `npm start` and check the screens you changed. Then run `npm test`.
 
-Dates are `YYYY`, `YYYY-MM`, or `present`. Links must start with `https://`. WhatsApp is the country code followed by digits only, with no `+` or spaces.
+**Format rules:** dates are `YYYY`, `YYYY-MM` or `present`. Links must start with `https://`. WhatsApp is the country code followed by digits only, or `""` to hide it.
 
-Put only information you are happy to make public in these files. The package ships them in readable form.
+**How skills get highlighted:** a skill turns green when its name exactly matches a tag in `projects.json` (same spelling and capitals). To highlight a skill, add it to the tags of a project that really used it.
+
+**Empty means hidden:** leave an optional field as `""` and the app hides it; it never shows a placeholder.
+
+**Privacy:** everything in these files is published in readable form and can't be fully withdrawn once on npm. Only include what you're happy to make public.
 
 ## Adding a section or action
 
-- A new read-only screen goes in `src/commands/<name>.sh` and uses `section_view` (or `menu_loop` if it has keys).
-- Add it to the main menu in `src/core/app.sh` (`app_main_render` and `app_main_handle`).
-- Add the new file to the `source` list in `src/main.sh`, in dependency order.
-- Browser, clipboard and network work goes in `src/services/` and returns a status code. Commands turn that code into the message shown to the user.
+- A read-only screen goes in `src/commands/<name>.sh` and uses `section_view`. A screen with actions uses `menu_loop` with a render function (calling `menu_items` and `menu_prompt`) and a handler.
+- Add it to the main menu in `src/core/app.sh` (`app_main_render` and `app_main_handle`), and to the `source` list in `src/main.sh`.
+- Browser, clipboard and network work goes in `src/services/` and returns a status code; the command turns it into the message shown.
+- Add the screen's key to the walk in `scripts/smoke-test.sh`, and follow the coding standards in [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+## Testing
+
+`npm test` runs `scripts/smoke-test.sh`, which covers:
+
+- the static card at 30–120 columns, in ASCII and no-color modes
+- every flag
+- a scripted walk through every interactive screen
+- that the mouse wheel, split mouse events and arrow keys never move or trigger the menu by mistake
+
+CI runs it on every push, along with syntax checks, ShellCheck, data validation, and a package build and run on Linux, macOS and Windows.
+
+Manual checks are still worth doing for interface changes: a real terminal on Windows (Git Bash, PowerShell), macOS and Linux, at a narrow width and in `--plain` mode.
 
 ## Releasing
 
-1. Move the items under `## [Unreleased]` in `CHANGELOG.md` to a new `## [x.y.z]` section.
-2. Set the same version in `package.json`.
-3. Commit, then run `npm run release:check`. It must pass.
-4. Tag and push: `git tag vx.y.z && git push --follow-tags`.
+Versions follow [Semantic Versioning](https://semver.org/). The first public release is `0.1.0`.
 
-The `release.yml` workflow then runs the checks and publishes to npm (`latest`, or `next` for pre-releases). It also creates the GitHub release. It needs an `NPM_TOKEN` repository secret.
+1. In `CHANGELOG.md`, move the items under `## [Unreleased]` into a new `## [x.y.z] - YYYY-MM-DD` section.
+2. Commit, then run `npm version x.y.z -m "chore(release): %s"`. It sets the version in `package.json`, commits it and creates the `vx.y.z` tag.
+3. Run `npm run release:check`. It must end with `release-check: OK`.
+4. Push: `git push --follow-tags`.
 
-## Known gaps
+The `release.yml` workflow then runs CI, publishes to npm with provenance (`latest`, or `next` for versions with a dash such as `0.2.0-rc.1`), and creates the GitHub release from the changelog section. It needs an `NPM_TOKEN` repository secret.
 
-- `npm test` runs `scripts/smoke-test.sh`: the static card at five widths (ASCII and no-color modes), the flags, a scripted walk through every interactive screen, and checks that the mouse wheel and arrow keys never jump the selection to Quit. CI runs it along with ShellCheck, syntax checks, data validation and the package smoke test.
-- The app has not been run on every target platform yet. The manual checklist in the plan (§16.2) is still open.
+**The very first release** has to be published by hand, because an npm token can only be scoped to a package that exists: `npm login`, then `npm publish --access public`, then `git push --follow-tags`.

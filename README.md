@@ -1,66 +1,94 @@
-# Labbai Irfan CLI
+# labbai-irfan
 
-An interactive developer card for your terminal. Run it, and a short card appears with who I am, what I build, and how to get in touch.
+[![CI](https://github.com/labbai-irfan/devfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/labbai-irfan/devfolio/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/labbai-irfan)](https://www.npmjs.com/package/labbai-irfan)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**My developer card, in your terminal.** One command shows who I am, what I've built and how to reach me. No install, no browser.
 
 ```bash
 npx labbai-irfan
 ```
 
-Press a number, or use the arrow keys and Enter, to open About, Career, Skills, Projects, GitHub, Resume, Contact and Pipeline (how this CLI is built, tested and released). Your portfolio link is under Contact. `b` or Esc goes back and `q` quits. On long pages, the arrow keys, the mouse wheel, Space/PgUp/PgDn and Home/End scroll.
+```
+  ╭──────────────────────────────────────────────────────────────────────────╮
+  │  Labbai Irfan                                                            │
+  │  Software Engineer | Aspiring DevOps & Cloud Engineer                    │
+  │  “Building, automating, deploying and scaling software.”                 │
+  ├──────────────────────────────────────────────────────────────────────────┤
+  │  LOCATION        Mumbai, India                                           │
+  │  AVAILABILITY    ● Open to DevOps & Cloud Engineering opportunities      │
+  ├──────────────────────────────────────────────────────────────────────────┤
+  │  PORTFOLIO       labbaiirfan.vercel.app                                  │
+  │  GITHUB          github.com/labbai-irfan                                 │
+  │  LINKEDIN        www.linkedin.com/in/irfan-labbai                        │
+  │  EMAIL           labbaiirfan09@gmail.com                                 │
+  ├──────────────────────────────────────────────────────────────────────────┤
+  │  SOFTWARE ENGINEERING  ·  DEVOPS  ·  CLOUD INFRASTRUCTURE                │
+  ╰──────────────────────────────────────────────────────────────────────────╯
+```
 
-The app captures the mouse so the wheel scrolls its pages instead of moving the menu. To select text with the mouse, hold Shift while dragging (Option on macOS).
+## What's inside
 
-> The package is not published to npm yet. Until it is, run it from a clone (see [DEVELOPMENT.md](docs/DEVELOPMENT.md)).
+| # | Section | What you'll find |
+|---|---|---|
+| 1 | **About** | Current role, location, availability and a short profile |
+| 2 | **Career** | Experience, education, certifications and a timeline |
+| 3 | **Skills** | Skills by area; the ones used in my projects are highlighted |
+| 4 | **Projects** | Each project's stack, status and repository link |
+| 5 | **GitHub** | Public repositories and languages, live from the GitHub API |
+| 6 | **Resume** | Download the PDF or open it in your browser |
+| 7 | **Contact** | Email, LinkedIn, GitHub and portfolio: open or copy in one key |
+| 8 | **Pipeline** | How this CLI itself is built, tested and released |
+
+## Keys
+
+| Key | Action |
+|---|---|
+| `1`–`8`, or arrows + `Enter` | Open a section |
+| `↑` `↓`, mouse wheel, `Space`, `PgUp` / `PgDn` | Scroll long pages |
+| `←` `→` | Previous / next project |
+| `b` or `Esc` | Back |
+| `q` | Quit |
+
+The app uses the mouse wheel for scrolling, so to select text hold **Shift** while dragging (**Option** on macOS).
 
 ## Requirements
 
-- **Node.js 18 or newer** (for `npx`). The app itself is Bash.
-- **Bash 3.2 or newer.**
-  - Linux and macOS: already installed.
-  - Windows: [Git for Windows](https://gitforwindows.org) (its Git Bash), or WSL.
-- **curl** (optional): needed for the resume download and live GitHub stats.
+- **Node.js 18+** (for `npx`)
+- **Bash 3.2+**: built into macOS and Linux. On Windows, install [Git for Windows](https://gitforwindows.org), which includes Git Bash; it works from PowerShell, cmd or Windows Terminal. WSL works too.
+- **curl** (optional): for live GitHub data and the resume download
 
 ## Options
 
-| Option | What it does |
+| Option | Effect |
 |---|---|
-| `--card` | Print the static card and exit. |
-| `--json` | Print the whole profile as JSON and exit. |
-| `--theme <name>` | `default` or `mono` (bold only, no colors). Also `LABBAI_THEME`. |
-| `--plain` | No colors, no box drawing, plain ASCII. Good for screen readers. |
-| `--no-color` | Turn off colors. Same as `NO_COLOR=1`. |
-| `--interactive` | Run the menu even when output is not a terminal. |
-| `--no-animation` | Skip animations (the short intro and loading spinners). |
-| `-h`, `--help` | Show help. |
-| `-v`, `--version` | Show version. |
+| `--card` | Print the card and exit (also what happens when output is piped) |
+| `--json` | Print the full profile as JSON |
+| `--plain` | Plain ASCII: no colors or box drawing, good for screen readers |
+| `--no-color` | No colors (same as `NO_COLOR=1`) |
+| `--theme mono` | Bold instead of colors (or `LABBAI_THEME=mono`) |
+| `--no-animation` | No intro or spinners (or `LABBAI_REDUCED_MOTION=1`) |
+| `--interactive` | Use the menu even when output isn't a terminal |
+| `-h`, `-v` | Help, version |
 
-When output is piped (`npx labbai-irfan | cat`), the app prints the static card instead of the menu.
+Environment variables: `LABBAI_OFFLINE=1` never uses the network, and `LABBAI_DEBUG=1` prints diagnostics to stderr.
 
-## Environment variables
+## Privacy and network
 
-| Variable | Effect |
-|---|---|
-| `NO_COLOR` | Turn off colors. |
-| `LABBAI_THEME` | Default theme. |
-| `LABBAI_OFFLINE=1` | Never use the network. |
-| `LABBAI_REDUCED_MOTION=1` | Same as `--no-animation`. |
-| `LABBAI_DEBUG=1` | Print debug messages to stderr. |
+The app only goes online when you open **GitHub** (public API, 5-second timeout) or **download the resume**. It sends no tracking or analytics. Offline, the GitHub screen falls back to a dated snapshot from the last release. Links open in your default browser, and if no browser or clipboard tool is found, the app shows the text so you can copy it yourself.
 
-## Platform notes
+## Make your own
 
-- **Linux:** opening links needs `xdg-open`. Copying needs `wl-copy` (Wayland) or `xclip` or `xsel` (X11).
-- **macOS:** uses `open` and `pbcopy`.
-- **Windows:** use Git Bash or WSL. Clipboard uses `clip.exe`.
-
-If a tool is missing, the app shows the link or text so you can do it yourself.
+All the content lives in [`src/data/*.json`](src/data). To make a card of your own, fork the repo, edit the JSON, run `npm run build` and `npm test`, then publish under your own name. See [DEVELOPMENT.md](docs/DEVELOPMENT.md) for details.
 
 ## Documentation
 
-- [DEVELOPMENT.md](docs/DEVELOPMENT.md): set up, build, update the profile, release.
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md): how the code is organised.
-- [CONTRIBUTING.md](CONTRIBUTING.md): how to report issues and send changes.
-- [CHANGELOG.md](CHANGELOG.md): what changed in each version.
+- [DEVELOPMENT.md](docs/DEVELOPMENT.md): setup, updating the profile, testing and releasing
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md): how the code is organised
+- [CONTRIBUTING.md](CONTRIBUTING.md): reporting issues and sending changes
+- [CHANGELOG.md](CHANGELOG.md): what changed in each version
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+[MIT](LICENSE) © Labbai Irfan

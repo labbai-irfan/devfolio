@@ -1,43 +1,30 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Fixed
-- Scrolling the mouse wheel no longer moves the menu selection or repaints the screen. The wheel now scrolls long pages.
-- Arrow keys no longer wrap around to Quit; on menus without Quit, every item can be reached with up/down.
-- Main screen repaints about 40x faster (459 ms to 11 ms on Git Bash) and without flicker or leftover characters.
-- Wrapped paragraphs keep their color and indent (About, GitHub, Resume, timeline).
-- Live GitHub stats work again (a jq sort error made every live fetch fall back to the snapshot).
-- The GitHub screen no longer shows invented fallback numbers; self-reported numbers from `profile.json` are labelled as such.
-- `npm run build` now produces every field the UI uses; the duplicate `scripts/build.js` is gone.
-- The resume save path is shown correctly on macOS and Linux; a failed download no longer risks ending the app.
-- ASCII fallbacks for every symbol in `--plain` mode, and the static card fits narrow terminals.
-- Terminal resizes are applied immediately.
+## [0.1.0] - 2026-11-02
+
+First public release.
 
 ### Added
-- Pipeline section: the real build, test and release pipeline of this CLI, and how its interface works.
-- Project browser: pick a project for its details and open its repository; the tag filter is back.
-- Contact shows each value next to its action; copy email and copy portfolio URL are back.
-- `--json` (was documented but not implemented) and `LABBAI_REDUCED_MOTION=1`.
-- The GitHub snapshot is generated from the API by `scripts/build.sh`, with its date.
-- `npm test` smoke tests, also run in CI.
+- `npx labbai-irfan` opens an interactive developer card. When output is piped or `--card` is used, it prints a static card.
+- Eight sections, ordered as a story: About, Career, Skills, Projects, GitHub, Resume, Contact and Pipeline.
+- **About:** current role, location, availability, focus areas and profile.
+- **Career:** experience, education, certifications and a vertical timeline.
+- **Skills:** grouped by area, with skills used in listed projects highlighted.
+- **Projects:** a browsable list with details, stack, status, repository link, previous/next and a tag filter.
+- **GitHub:** public stats, languages and top repositories, live from the GitHub API with a dated snapshot as offline fallback. Self-reported numbers are labelled as such.
+- **Resume:** download the PDF (never overwrites an existing file) or open it online.
+- **Contact:** email, LinkedIn, GitHub and portfolio, each opened or copied in one key. Empty channels are hidden.
+- **Pipeline:** how this CLI is built, tested and released.
+- Keyboard and mouse: number keys, arrow keys and Enter, mouse-wheel scrolling, Space/PgUp/PgDn/Home/End, and `b`/Esc/`q`.
+- Options: `--card`, `--json`, `--plain`, `--no-color`, `--theme mono`, `--no-animation` and `--interactive`. Environment: `NO_COLOR`, `LABBAI_THEME`, `LABBAI_OFFLINE`, `LABBAI_REDUCED_MOTION` and `LABBAI_DEBUG`.
+- Works with Bash 3.2+ on Linux, macOS and Windows (Git Bash or WSL), in UTF-8 or plain ASCII, at any width down to 30 columns, and adapts when the terminal is resized.
+- Profile data kept in JSON, validated, and compiled for Bash at build time, so visitors don't need `jq`.
+- CI: syntax check, ShellCheck, data validation, smoke tests, and package checks on Linux, macOS and Windows. Releases are published from git tags with npm provenance.
 
-### Changed
-- The Portfolio screen is merged into Contact (it repeated the same link); the main menu has 7 sections.
-- The start-up intro is a short typed `whoami` (about 0.3 s) instead of a two-second fake progress sequence.
-- Skills are shown as one wrapped line per category; the card focus row comes from `profile.json` (`focus`).
-- Every screen uses the same key-hint footer.
-- The CI package-size limit is 100 KB (was 60 KB).
-
-## [0.0.1]
-
-- Bash entry point with `--help`, `--version`, `--card`, `--plain`, `--no-color` and `--interactive`.
-- Profile data kept in JSON, validated and compiled for Bash by `scripts/build.sh`.
-- Developer card and single-key menus, with colors that respect `NO_COLOR` and non-terminal output.
-- Sections: About, Skills, Projects, Career (Experience, Education, Certifications, Timeline), GitHub, Contact, Resume, Portfolio.
-- Actions: open links, send email, open WhatsApp, copy email and portfolio URL, download and open the resume.
-- GitHub public stats (live, with a build-time snapshot as fallback), project tag filter, QR code and `mono` theme.
-- Node launcher for `npx labbai-irfan`, with Git Bash detection on Windows.
+[Unreleased]: https://github.com/labbai-irfan/devfolio/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/labbai-irfan/devfolio/releases/tag/v0.1.0
