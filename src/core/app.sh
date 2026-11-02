@@ -72,7 +72,7 @@ app_print_json() {
 
 app_main_render() {
   card_render
-  menu_items "1:About" "2:Skills" "3:Projects" "4:Career" "5:GitHub" "6:Contact" "7:Resume" "q:Quit"
+  menu_items "1:About" "2:Skills" "3:Projects" "4:Career" "5:GitHub" "6:Contact" "7:Resume" "8:Built With" "q:Quit"
   menu_prompt
 }
 
@@ -85,6 +85,7 @@ app_main_handle() {
     5) cmd_github ;;
     6) cmd_contact ;;
     7) cmd_resume ;;
+    8) cmd_built ;;
     *) return 1 ;;
   esac
 }
@@ -127,7 +128,7 @@ app_goodbye() {
 
   printf '\n%s%sThanks for your time.%s  %s%s %s%s\n' "$m" "${C_BOLD:-}" "$r" \
     "${C_MUTED:-${C_DIM:-}}" "$dash" "${C_ACCENT:-}${C_BOLD:-}$PROFILE_NAME" "$r"
-  [[ -n "$PROFILE_AVAILABILITY" ]] && printf '%s%s%s%s %s\n' "$m" "${C_GREEN:-${C_OK:-}}" "$ICON_BULLET" "$r" "$PROFILE_AVAILABILITY"
+  [[ -n "$PROFILE_AVAILABILITY" ]] && layout_wrap "$PROFILE_AVAILABILITY" "${C_GREEN:-${C_OK:-}}$ICON_BULLET$r " "  "
   if [[ -n "$PROFILE_EMAIL" && -n "$site" ]]; then
     printf '%s%s%s%s%s%s%s%s\n' "$m" "$cyan" "$PROFILE_EMAIL" "$r" "$sep" "$cyan" "$site" "$r"
   elif [[ -n "$PROFILE_EMAIL$site" ]]; then

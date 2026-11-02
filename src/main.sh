@@ -53,6 +53,8 @@ source "$APP_ROOT/src/commands/contact.sh"
 source "$APP_ROOT/src/commands/resume.sh"
 # shellcheck source=commands/github.sh
 source "$APP_ROOT/src/commands/github.sh"
+# shellcheck source=commands/built.sh
+source "$APP_ROOT/src/commands/built.sh"
 
 # shellcheck source=core/app.sh
 source "$APP_ROOT/src/core/app.sh"

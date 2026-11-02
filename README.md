@@ -6,7 +6,7 @@ An interactive developer card for your terminal. Run it, and a short card appear
 npx labbai-irfan
 ```
 
-Press a number, or use the arrow keys and Enter, to open About, Skills, Projects, Career, GitHub, Contact and Resume. Your portfolio link is under Contact. `b` or Esc goes back and `q` quits. On long pages, the arrow keys, the mouse wheel, Space/PgUp/PgDn and Home/End scroll.
+Press a number, or use the arrow keys and Enter, to open About, Skills, Projects, Career, GitHub, Contact, Resume and Built With (how this CLI is engineered and released). Your portfolio link is under Contact. `b` or Esc goes back and `q` quits. On long pages, the arrow keys, the mouse wheel, Space/PgUp/PgDn and Home/End scroll.
 
 The app captures the mouse so the wheel scrolls its pages instead of moving the menu. To select text with the mouse, hold Shift while dragging (Option on macOS).
 

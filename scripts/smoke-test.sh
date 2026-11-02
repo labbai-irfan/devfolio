@@ -30,7 +30,7 @@ code=0; bash "$CLI" --no-such-flag 2>/dev/null || code=$?
 (( code == 2 )) && pass "unknown flag exits 2" || fail "unknown flag exited $code"
 
 # Interactive walk: every screen, then quit. Keys are piped all at once.
-keys='1b2b31bfab41b4bb5b6b7bq'
+keys='1b2b31bfab41b4bb5b6b7b8bq'
 err="$(mktemp)"
 out="$(printf '%s' "$keys" | LABBAI_OFFLINE=1 bash "$CLI" --interactive --plain --no-animation 2>"$err")" && code=0 || code=$?
 if (( code == 0 )) && [[ ! -s "$err" ]]; then pass "interactive walk through every screen"; else fail "interactive walk (exit $code): $(cat "$err")"; fi
