@@ -50,9 +50,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install jq (macOS and Windows)
-        if: runner.os != 'Linux'
-        run: brew install jq || choco install jq -y --no-progress
+      - name: Install jq (macOS)
+        if: runner.os == 'macOS'
+        run: brew install jq
+
+      - name: Install jq (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: choco install jq -y --no-progress
 
       - name: Build profile data
         run: npm run build
