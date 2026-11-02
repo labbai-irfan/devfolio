@@ -21,10 +21,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Project browser: pick a project for its details and open its repository; the tag filter is back.
 - Contact shows each value next to its action; copy email and copy portfolio URL are back.
 - `--json` (was documented but not implemented) and `LABBAI_REDUCED_MOTION=1`.
-- The GitHub snapshot is generated from the API by `scripts/build.sh`, with its date; QR code generation when `qrencode` is installed.
+- The GitHub snapshot is generated from the API by `scripts/build.sh`, with its date.
 - `npm test` smoke tests, also run in CI.
 
 ### Changed
+- The Portfolio screen is merged into Contact (it repeated the same link); the main menu has 7 sections.
 - The start-up intro is a short typed `whoami` (about 0.3 s) instead of a two-second fake progress sequence.
 - Skills are shown as one wrapped line per category; the card focus row comes from `profile.json` (`focus`).
 - Every screen uses the same key-hint footer.

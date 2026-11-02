@@ -3,7 +3,6 @@
 #   profile.sh    all profile data as Bash variables (values escaped with @sh, so sourcing is safe)
 #   github.sh     GitHub snapshot from the public API, used when live data is unavailable
 #                 (best effort: skipped offline or with LABBAI_OFFLINE=1; an existing snapshot is kept)
-#   qr.txt        QR code for the portfolio URL (only when qrencode is installed)
 # Missing optional fields compile to empty values. Nothing is invented.
 # Usage: build.sh [data-dir]
 set -euo pipefail
@@ -121,10 +120,4 @@ else
   else
     printf 'warn: GitHub snapshot not updated (%s); keeping the previous one if any\n' "$GH_ERROR" >&2
   fi
-fi
-
-portfolio="$(jq -r '.links.portfolio // ""' "$DATA/profile.json" | tr -d '\r')"
-if command -v qrencode >/dev/null 2>&1 && [[ -n "$portfolio" ]]; then
-  qrencode -t UTF8 -m 1 -o "$DATA/qr.txt" "$portfolio"
-  printf 'Built %s\n' "$DATA/qr.txt"
 fi

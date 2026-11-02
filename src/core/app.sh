@@ -72,7 +72,7 @@ app_print_json() {
 
 app_main_render() {
   card_render
-  menu_items "1:About" "2:Skills" "3:Projects" "4:Career" "5:GitHub" "6:Contact" "7:Resume" "8:Portfolio" "q:Quit"
+  menu_items "1:About" "2:Skills" "3:Projects" "4:Career" "5:GitHub" "6:Contact" "7:Resume" "q:Quit"
   menu_prompt
 }
 
@@ -85,7 +85,6 @@ app_main_handle() {
     5) cmd_github ;;
     6) cmd_contact ;;
     7) cmd_resume ;;
-    8) cmd_portfolio ;;
     *) return 1 ;;
   esac
 }

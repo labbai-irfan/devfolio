@@ -1,5 +1,4 @@
 node_modules/
 src/data/profile.sh
 src/data/github.sh
-src/data/qr.txt
 *.tgz

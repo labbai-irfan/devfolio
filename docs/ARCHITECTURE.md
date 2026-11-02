@@ -12,7 +12,7 @@ src/commands/       one file per menu section: what to show and which actions ex
 src/ui/             drawing: card, layout, menus
 src/services/       the outside world: browser, clipboard, download, GitHub
 src/lib/            generic helpers: colors, logging, terminal, validation
-src/data/           personal information (JSON) and the build output (profile.sh, github.sh, qr.txt)
+src/data/           personal information (JSON) and the build output (profile.sh, github.sh)
 ```
 
 **Dependency rule:** `core → commands → ui/services → lib`. Lower layers never call upper layers. `lib/` has no knowledge of this profile, so it could be reused elsewhere.
@@ -44,7 +44,6 @@ src/data/*.json ──validate-data.sh──► checks
         │
         └──build.sh──► profile.sh     (Bash variables, values escaped with @sh)
                    ├─► github.sh      (GitHub snapshot, best effort)
-                   └─► qr.txt         (only if qrencode is installed)
 ```
 
 Lists are stored as parallel indexed arrays, such as `PROJECT_NAME[i]`. Fields with several values (tags, highlights) are joined with `|` and split when drawn. Bash 3.2 has no associative arrays, so none are used.

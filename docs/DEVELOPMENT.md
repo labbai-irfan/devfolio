@@ -8,7 +8,6 @@
 | Node.js 18+ and npm | `npx` launcher, packing and publishing | yes |
 | jq | building and validating the profile data | yes |
 | ShellCheck | linting | yes (CI runs it too) |
-| qrencode | QR code on the Portfolio screen | optional |
 | curl | resume download, GitHub stats | optional at runtime |
 
 On Windows, install [Git for Windows](https://gitforwindows.org) for Git Bash. Use Git Bash for every command below.
@@ -23,7 +22,7 @@ npm run release:check  # pre-release gate (see Releasing)
 shellcheck bin/labbai-irfan && find scripts src -name '*.sh' -exec shellcheck {} +
 ```
 
-`npm run build` must run after any change to `src/data/*.json`. The app reads the generated files (profile.sh, github.sh, qr.txt), not the JSON.
+`npm run build` must run after any change to `src/data/*.json`. The app reads the generated files (profile.sh, github.sh), not the JSON.
 
 ## Updating the profile
 
