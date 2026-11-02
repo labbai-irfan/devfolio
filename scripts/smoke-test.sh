@@ -30,7 +30,7 @@ code=0; bash "$CLI" --no-such-flag 2>/dev/null || code=$?
 (( code == 2 )) && pass "unknown flag exits 2" || fail "unknown flag exited $code"
 
 # Interactive walk: every screen, then quit. Keys are piped all at once.
-keys='1b2b31bfab41b4bb5b6b7b8bq'
+keys='1b21b4bb3b41bfab5b6b7b8bq'
 err="$(mktemp)"
 out="$(printf '%s' "$keys" | LABBAI_OFFLINE=1 bash "$CLI" --interactive --plain --no-animation 2>"$err")" && code=0 || code=$?
 if (( code == 0 )) && [[ ! -s "$err" ]]; then pass "interactive walk through every screen"; else fail "interactive walk (exit $code): $(cat "$err")"; fi
@@ -39,6 +39,12 @@ grep -q "Thanks for your time" <<<"$out" && pass "goodbye message on quit" || fa
 # Mouse wheel must not move the selection: wheel events, then Enter, must open item 1 (About).
 out="$(printf '\033[<65;5;5M\033[<65;5;5M\033[<64;5;5M\nbq' | LABBAI_OFFLINE=1 bash "$CLI" --interactive --plain --no-animation 2>"$err")"
 grep -q "CURRENT FOCUS" <<<"$out" && pass "mouse wheel leaves the selection alone" || fail "mouse wheel moved the selection"
+
+# A mouse event delivered in two pieces (as Windows terminals do) must not be read as menu keys:
+# the digits in "[<64;20;10M" used to open screen 6 (Resume) with no key pressed.
+out="$( ( sleep 0.3; printf '\033'; sleep 0.15; printf '[<64;20;10M'; sleep 0.6; printf 'q' ) | LABBAI_OFFLINE=1 bash "$CLI" --interactive --plain --no-animation 2>"$err")"
+grep -qE '^  (About|Career|Skills|Projects|GitHub|Resume|Contact|Pipeline) ' <<<"$out" \
+  && fail "a split mouse event opened a screen" || pass "a split mouse event is ignored"
 
 # Arrows clamp at the top instead of wrapping to Quit.
 out="$(printf '\033[A\033[A\033[A\nbq' | LABBAI_OFFLINE=1 bash "$CLI" --interactive --plain --no-animation 2>"$err")"

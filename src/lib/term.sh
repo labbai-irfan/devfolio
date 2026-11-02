@@ -61,25 +61,25 @@ term_read_input() {
   trap 'echo RESIZE; exit 0' WINCH
   IFS= read -rsn1 k || return 1
 
+  # How long to wait for the rest of an escape sequence. Windows terminals (ConPTY) can deliver one
+  # mouse event in pieces several milliseconds apart; too short a wait turns the tail of a wheel event
+  # ("[<64;20;10M") into keypresses, and its digits open menu items. Bash 3.2 needs whole seconds.
+  local t=0.5
+  (( BASH_VERSINFO[0] >= 4 )) || t=1
+
   if [[ "$k" != $'\033' ]]; then
+    # A lone "[" is the tail of a sequence whose ESC was read earlier. No menu uses "[", so read the
+    # rest of the sequence and drop it rather than treating its digits as menu keys.
+    if [[ "$k" == '[' ]]; then term_read_csi seq "$t"; echo IGNORE; return 0; fi
     if [[ -z "$k" || "$k" == $'\r' ]]; then echo ENTER; else printf '%s\n' "$k"; fi
     return 0
   fi
 
-  # Bash 3.2 (macOS) only accepts whole-second timeouts.
-  local t=0.05
-  (( BASH_VERSINFO[0] >= 4 )) || t=1
-
   IFS= read -rsn1 -t "$t" ch 2>/dev/null || { echo ESC; return 0; }
   seq="$ch"
   if [[ "$ch" == '[' ]]; then
-    # CSI: read until the final byte. Covers arrows, ~-keys and SGR mouse (ESC [ < b ; x ; y M).
-    while IFS= read -rsn1 -t "$t" ch 2>/dev/null; do
-      seq="$seq$ch"
-      # X10 mouse: ESC [ M + 3 raw bytes.
-      if [[ "$seq" == '[M' ]]; then read -rsn3 -t "$t" ch 2>/dev/null; echo IGNORE; return 0; fi
-      [[ "$ch" == [[:alpha:]~@] ]] && break
-    done
+    term_read_csi seq "$t"
+    if [[ "$seq" == '[M' ]]; then echo IGNORE; return 0; fi
   elif [[ "$ch" == O ]]; then
     IFS= read -rsn1 -t "$t" ch 2>/dev/null && seq="$seq$ch"
   fi
@@ -97,4 +97,17 @@ term_read_input() {
     '[<65;'*M) echo WHEEL_DOWN ;;
     *) echo IGNORE ;;
   esac
+}
+
+# term_read_csi VAR TIMEOUT — appends the rest of a CSI sequence (after "[") to VAR, up to its final
+# byte. Covers arrows, ~-keys and SGR mouse (< b ; x ; y M/m). X10 mouse ("[M" + 3 raw bytes) leaves
+# VAR as "[M" with the 3 bytes consumed.
+term_read_csi() {
+  local _ch _s="["
+  while IFS= read -rsn1 -t "$2" _ch 2>/dev/null; do
+    _s="$_s$_ch"
+    if [[ "$_s" == '[M' ]]; then read -rsn3 -t "$2" _ch 2>/dev/null || true; break; fi
+    [[ "$_ch" == [[:alpha:]~@] ]] && break
+  done
+  printf -v "$1" '%s' "$_s"
 }
