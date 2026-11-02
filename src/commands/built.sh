@@ -1,11 +1,11 @@
 # shellcheck shell=bash
-# Section 8 — Built With: how this CLI is engineered — its real build, test and release pipeline
+# Section 8 — Pipeline: how this CLI is engineered — its real build, test and release pipeline
 # (.github/workflows/ci.yml + release.yml) and the techniques behind the interface.
 
 [[ -n "${_CMD_BUILT_SH:-}" ]] && return 0
 _CMD_BUILT_SH=1
 
-cmd_built() { section_view "Built With" built_body "how this CLI works"; }
+cmd_built() { section_view "Pipeline" built_body "how this CLI is built and shipped"; }
 
 # built_row LABEL TEXT [COLOR] — label column with TEXT wrapped beside it.
 built_row() {

@@ -70,21 +70,23 @@ app_print_json() {
   printf '}\n'
 }
 
+# Sections follow how a visitor gets to know someone: who → experience → skills → work → proof → contact.
+# "Pipeline" is about the CLI itself, not the person, so it comes last.
 app_main_render() {
   card_render
-  menu_items "1:About" "2:Skills" "3:Projects" "4:Career" "5:GitHub" "6:Contact" "7:Resume" "8:Built With" "q:Quit"
+  menu_items "1:About" "2:Career" "3:Skills" "4:Projects" "5:GitHub" "6:Resume" "7:Contact" "8:Pipeline" "q:Quit"
   menu_prompt
 }
 
 app_main_handle() {
   case "$1" in
     1) cmd_about ;;
-    2) cmd_skills ;;
-    3) cmd_projects ;;
-    4) cmd_career ;;
+    2) cmd_career ;;
+    3) cmd_skills ;;
+    4) cmd_projects ;;
     5) cmd_github ;;
-    6) cmd_contact ;;
-    7) cmd_resume ;;
+    6) cmd_resume ;;
+    7) cmd_contact ;;
     8) cmd_built ;;
     *) return 1 ;;
   esac

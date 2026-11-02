@@ -18,7 +18,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Terminal resizes are applied immediately.
 
 ### Added
-- Built With: the real build, test and release pipeline of this CLI, and how its interface works.
+- Pipeline section: the real build, test and release pipeline of this CLI, and how its interface works.
 - Project browser: pick a project for its details and open its repository; the tag filter is back.
 - Contact shows each value next to its action; copy email and copy portfolio URL are back.
 - `--json` (was documented but not implemented) and `LABBAI_REDUCED_MOTION=1`.
