@@ -78,6 +78,6 @@ Versions follow [Semantic Versioning](https://semver.org/). The first public rel
 3. Run `npm run release:check`. It must end with `release-check: OK`.
 4. Push: `git push --follow-tags`.
 
-The `release.yml` workflow then runs CI, publishes to npm with provenance (`latest`, or `next` for versions with a dash such as `0.2.0-rc.1`), and creates the GitHub release from the changelog section. It needs an `NPM_TOKEN` repository secret.
+The `release.yml` workflow then runs CI, publishes to npm (`latest`, or `next` for versions with a dash such as `0.2.0-rc.1`), and creates the GitHub release from the changelog section. It uses npm **Trusted Publishing**, so there's no token to store or renew, and npm adds provenance automatically.
 
-**The very first release** has to be published by hand, because an npm token can only be scoped to a package that exists: `npm login`, then `npm publish --access public`, then `git push --follow-tags`.
+**The very first release** has to be published by hand, because Trusted Publishing can only be set up for a package that already exists: `npm login`, then `npm publish --access public`, then `git push --follow-tags`. Then, on npmjs.com, open the package → **Settings** → **Trusted Publisher** → **GitHub Actions**, and enter owner `labbai-irfan`, repository `devfolio`, workflow `release.yml`.

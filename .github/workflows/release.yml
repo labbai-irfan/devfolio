@@ -5,23 +5,31 @@ on:
     tags: ['v*.*.*']
 
 permissions:
-  contents: write
-  id-token: write
+  contents: read
 
 jobs:
+  # The full CI pipeline (lint, smoke tests, package on Linux/macOS/Windows) must pass first.
   verify:
     uses: ./.github/workflows/ci.yml
 
   publish:
+    name: Publish to npm
     needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the GitHub release
+      id-token: write   # npm Trusted Publishing (OIDC): no NPM_TOKEN secret needed
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
+
+      # Trusted Publishing needs npm 11.5.1 or newer.
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: Release checks
         env:
@@ -29,15 +37,14 @@ jobs:
         run: bash scripts/release-check.sh
 
       - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           version="$(node -p "require('./package.json').version")"
           # Pre-release versions such as 0.9.0-rc.1 go to the "next" tag, so "npx labbai-irfan" keeps the stable release.
           tag=latest
           if [[ "$version" == *-* ]]; then tag=next; fi
           # prepack runs scripts/build.sh, so the profile data is compiled into the package.
-          npm publish --provenance --access public --tag "$tag"
+          # Trusted Publishing adds provenance automatically.
+          npm publish --access public --tag "$tag"
 
       - name: Create GitHub release
         env:
