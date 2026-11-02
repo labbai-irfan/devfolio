@@ -87,6 +87,7 @@ All the content lives in [`src/data/*.json`](src/data). To make a card of your o
 - [DEVELOPMENT.md](docs/DEVELOPMENT.md): setup, updating the profile, testing and releasing
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md): how the code is organised
 - [CONTRIBUTING.md](CONTRIBUTING.md): reporting issues and sending changes
+- [SECURITY.md](SECURITY.md): what the CLI does on your machine, and how to report a vulnerability
 - [CHANGELOG.md](CHANGELOG.md): what changed in each version
 
 ## License

@@ -31,6 +31,20 @@ jobs:
       - name: Validate profile data
         run: bash scripts/validate-data.sh
 
+      # What protects people who run `npx labbai-irfan`: no dependencies to compromise,
+      # and no install scripts that run code on their machine at install time.
+      - name: No dependencies or install scripts
+        run: |
+          node -e "
+            const p = require('./package.json');
+            const deps = ['dependencies','optionalDependencies','peerDependencies','bundleDependencies'].filter(k => p[k] && Object.keys(p[k]).length);
+            const hooks = ['preinstall','install','postinstall','prepare'].filter(k => p.scripts && p.scripts[k]);
+            if (deps.length || hooks.length) { console.error('Not allowed in package.json:', [...deps, ...hooks].join(', ')); process.exit(1); }
+            console.log('OK: no runtime dependencies, no install scripts');"
+
+      - name: Dependency audit
+        run: npm audit --audit-level=moderate
+
       - name: Smoke test
         run: |
           LABBAI_OFFLINE=1 bash scripts/build.sh

@@ -5,6 +5,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- Security: Dependabot, CodeQL, `npm audit`, a CI guard against dependencies and install scripts, and a security policy (SECURITY.md).
+
+## [0.1.1] - 2026-11-02
+
+### Changed
+- Migrated npm publishing to GitHub Actions Trusted Publishing.
+- Added OIDC authentication.
+- Improved automated release workflow.
+
 ## [0.1.0] - 2026-11-02
 
 First public release.
@@ -26,11 +36,6 @@ First public release.
 - Profile data kept in JSON, validated, and compiled for Bash at build time, so visitors don't need `jq`.
 - CI: syntax check, ShellCheck, data validation, smoke tests, and package checks on Linux, macOS and Windows. Releases are published from git tags with npm provenance.
 
-## [Unreleased]
-
-## [0.1.1] - 2026-11-02
-
-### Changed
-- Migrated npm publishing to GitHub Actions Trusted Publishing.
-- Added OIDC authentication.
-- Improved automated release workflow.
+[Unreleased]: https://github.com/labbai-irfan/devfolio/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/labbai-irfan/devfolio/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/labbai-irfan/devfolio/releases/tag/v0.1.0
