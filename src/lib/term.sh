@@ -34,9 +34,6 @@ term_supports_utf8() {
 
 term_clear() { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[2J\033[H'; return 0; }
 
-# Repaint in place: cursor home now, clear whatever is left below after drawing (no flicker).
-term_home()       { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[H'; return 0; }
-term_clear_below() { [[ "${PLATFORM_TTY:-0}" == 1 ]] && printf '\033[J'; return 0; }
 
 # Alternate screen + SGR mouse reporting. With mouse reporting on, the wheel arrives as mouse
 # events (which term_read_input reports as WHEEL_UP/WHEEL_DOWN) instead of being turned into
